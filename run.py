@@ -19,12 +19,33 @@ import re
 
 def welcomeScreen():
     global status
-    print('welcome')
-    print('Press (y) to start')
-    while True:
-        if keyboard.read_key() == "y":
+    # print('welcome')
+    # print('Press (y) to start')
+    cap = cv2.VideoCapture('screens/welcome.mp4')
+    while(cap.isOpened()):
+        ret, frame = cap.read() 
+        cv2.namedWindow("window", cv2.WND_PROP_FULLSCREEN)
+        cv2.setWindowProperty("window",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
+    
+        if ret:
+            cv2.imshow("window", frame)
+        else:
+        #    print('no video')
+           cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+           continue
+
+        if cv2.waitKey(1) & 0xFF == ord('y'):
+            cap.release()
+            cv2.destroyAllWindows()
             status = 'camera'
             main()
+            # break
+    # while True:
+        # if keyboard.read_key() == "y":
+        #     cap.release()
+        #     cv2.destroyAllWindows()
+        #     status = 'camera'
+        #     main()
 
 def decode_predictions(scores, geometry):
     # grab the number of rows and columns from the scores volume, then
