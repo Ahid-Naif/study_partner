@@ -1,3 +1,5 @@
+from multiprocessing.connection import wait
+from unittest import result
 from imutils.object_detection import non_max_suppression
 import numpy as np
 import pytesseract
@@ -40,6 +42,7 @@ def welcomeScreen():
             status = 'camera'
             main()
             # break
+        time.sleep(0.03333) # 30 fps
     # while True:
         # if keyboard.read_key() == "y":
         #     cap.release()
@@ -245,15 +248,29 @@ def callback(indata, frames, time, status):
 
 def voiceProgram():
     results_voice = []
-
-    print('Press button, then, start talking...')
+    img = cv2.imread('screens/mic.jpg')
     while True:
-        if keyboard.is_pressed('space'):
+        cv2.imshow("window", img)
+        if cv2.waitKey(1) & 0xFF == 32:
             break
-    
+    cv2.destroyAllWindows()
+
+    cap = cv2.VideoCapture('screens/listening.mp4')
     soundStream.start()
-    while keyboard.is_pressed('space'): # infinite loop
-        # beginning
+    start_time = time.time()
+    while(cap.isOpened()):
+        if time.time() - start_time > 0.03333:  # 30 fps
+            ret, frame = cap.read() 
+            cv2.namedWindow("window", cv2.WND_PROP_FULLSCREEN)
+            cv2.setWindowProperty("window",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
+
+            if ret:
+                cv2.imshow("window", frame)
+            else:
+               cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+               continue
+            start_time = time.time()
+        
         data = q.get()
         if rec.AcceptWaveform(data):
             sentence = rec.Result() # تم تحويل الصوت إلى نص
@@ -261,10 +278,25 @@ def voiceProgram():
             results_voice.append(sentence.get("text", ""))
         else:
             partial = rec.PartialResult() # تم تحويل الصوت إلى نص
-              
-    results_voice = " ".join(results_voice)
-    soundStream.stop()
-    check2(results_voice)
+        
+        if cv2.waitKey(1) & 0xFF == 32:
+            start_time2= time.time()
+            while True:
+                data = q.get()
+                if rec.AcceptWaveform(data):
+                    sentence = rec.Result() # تم تحويل الصوت إلى نص
+                    sentence = json.loads(sentence)
+                    results_voice.append(sentence.get("text", ""))
+                else:
+                    partial = rec.PartialResult() # تم تحويل الصوت إلى نص
+            
+                if time.time() - start_time2 > 2:
+                    break
+            cap.release()
+            cv2.destroyAllWindows()
+            results_voice = " ".join(results_voice)
+            soundStream.stop()
+            check2(results_voice)
 
 def check2(results_voice):
     global status
@@ -297,8 +329,8 @@ def similarityProgram():
     
     ocr_data = re.sub(r'[^\w]', ' ', ocr_data).rstrip()
     speech_data = re.sub(r'[^\w]', ' ', speech_data).rstrip()
-    print(ocr_data)
-    print(speech_data)
+    # print(ocr_data)
+    # print(speech_data)
 
     my_result_out = session.run(
         my_result, feed_dict={text_input: [ocr_data, speech_data]})
@@ -306,8 +338,49 @@ def similarityProgram():
     corr = np.inner(my_result_out, my_result_out)
 
     print('Result is: ')
-    print(float("{:.2f}".format(corr[0][1]))*100)
+    result = float("{:.2f}".format(corr[0][1]))*100
+    start_time = time.time()
+    cap = cv2.VideoCapture('screens/processing.mp4')
+    while(cap.isOpened()):
+        ret, frame = cap.read() 
+        cv2.namedWindow("window", cv2.WND_PROP_FULLSCREEN)
+        cv2.setWindowProperty("window",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
+        if ret:
+            cv2.imshow("window", frame)
+        else:
+        #    print('no video')
+           cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+           continue
+        cv2.waitKey(1)
+        if time.time() - start_time > 2:
+            cap.release()
+            cv2.destroyAllWindows()
+            break
+        time.sleep(0.03333) # 30 fps
 
+    if result > 70:
+        cap = cv2.VideoCapture('screens/happy.mp4')
+    elif result >= 40 and result <= 70:
+        cap = cv2.VideoCapture('screens/neutral.mp4')
+    elif result < 40:
+        cap = cv2.VideoCapture('screens/sad.mp4')
+
+    while(cap.isOpened()):
+        ret, frame = cap.read() 
+        cv2.namedWindow("window", cv2.WND_PROP_FULLSCREEN)
+        cv2.setWindowProperty("window",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
+        if ret:
+            cv2.imshow("window", frame)
+        else:
+        #    print('no video')
+           cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+           continue
+        if cv2.waitKey(1) & 0xFF == 32:
+            cap.release()
+            cv2.destroyAllWindows()
+            break
+        time.sleep(0.03333) # 30 fps
+    print(result)
     status = 'welcome'
     main()
 
