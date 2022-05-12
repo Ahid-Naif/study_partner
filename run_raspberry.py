@@ -243,8 +243,7 @@ def ocrProgram():
     config = ("-l eng --oem 1 --psm 3")
     text = pytesseract.image_to_string(roi, config=config)
     tb = TextBlob(text)
-    text = tb.correct()
-    
+    text = str(tb.correct())    
     vs.release()
     cv2.destroyAllWindows()
     check1(text)
