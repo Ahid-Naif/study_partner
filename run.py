@@ -18,6 +18,7 @@ import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
 import os
 import re
+from textblob import TextBlob
 
 def welcomeScreen():
     global status
@@ -227,6 +228,8 @@ def ocrProgram():
     # (3) an OEM value, in this case
     config = ("-l eng --oem 1 --psm 3")
     text = pytesseract.image_to_string(roi, config=config)
+    tb = TextBlob(text)
+    text = tb.correct()
     
     vs.release()
     cv2.destroyAllWindows()
