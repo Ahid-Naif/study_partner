@@ -340,7 +340,7 @@ def similarityProgram():
     # print(my_result_out)
     corr = np.inner(my_result_out, my_result_out)
 
-    print('Result is: ')
+    # print('Result is: ')
     result = float("{:.2f}".format(corr[0][1]))*100
     start_time = time.time()
     cap = cv2.VideoCapture('screens/processing.mp4')
@@ -383,7 +383,7 @@ def similarityProgram():
             cv2.destroyAllWindows()
             break
         time.sleep(0.03333) # 30 fps
-    print(result)
+    # print(result)
     status = 'welcome'
     main()
 
