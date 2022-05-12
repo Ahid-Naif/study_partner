@@ -452,7 +452,7 @@ if __name__ == '__main__':
     
     ## Similarity
     ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-    module_url = ROOT_DIR+"\module"
+    module_url = ROOT_DIR+"/module"
     
     g = tf.Graph()
     with g.as_default():
