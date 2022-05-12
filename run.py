@@ -336,7 +336,7 @@ def similarityProgram():
     # print(speech_data)
 
     my_result_out = session.run(
-        my_result, feed_dict={text_input: [ocr_data, speech_data]})
+        my_result, feed_dict={text_input: [ocr_data.lower(), speech_data.lower()]})
     # print(my_result_out)
     corr = np.inner(my_result_out, my_result_out)
 
