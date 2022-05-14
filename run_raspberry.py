@@ -458,10 +458,14 @@ if __name__ == '__main__':
     with g.as_default():
         text_input = tf.placeholder(dtype=tf.string, shape=[None])
         embed = hub.load(module_url)
+        print("1")
         my_result = embed(text_input)
+        print("2")
         init_op = tf.group(
             [tf.global_variables_initializer(), tf.tables_initializer()])
+        print("3")
     g.finalize()
+    print("4")
     
     # Create session and initialize.
     # session = tf.Session(graph=g)
