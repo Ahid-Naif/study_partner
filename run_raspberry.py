@@ -32,6 +32,7 @@ start_time = time.time()
 
 def welcomeScreen():
     global status
+    global waiting
     cap = cv2.VideoCapture('screens2/welcome.mp4')
     while(cap.isOpened()):
         ret, frame = cap.read() 
