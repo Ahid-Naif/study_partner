@@ -451,22 +451,22 @@ if __name__ == '__main__':
     ## Vosk - End
     
     ## Similarity
-    ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-    module_url = ROOT_DIR+"/module"
+    # # # ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+    # # # module_url = ROOT_DIR+"/module"
     
-    g = tf.Graph()
-    with g.as_default():
-        text_input = tf.placeholder(dtype=tf.string, shape=[None])
-        embed = hub.load(module_url)
-        my_result = embed(text_input)
-        init_op = tf.group(
-            [tf.global_variables_initializer(), tf.tables_initializer()])
-    g.finalize()
+    # # # g = tf.Graph()
+    # # # with g.as_default():
+    # # #     text_input = tf.placeholder(dtype=tf.string, shape=[None])
+    # # #     embed = hub.load(module_url)
+    # # #     my_result = embed(text_input)
+    # # #     init_op = tf.group(
+    # # #         [tf.global_variables_initializer(), tf.tables_initializer()])
+    # # # g.finalize()
     
-    # Create session and initialize.
-    session = tf.Session(graph=g)
-    session.run(init_op)
-    ## Similarity - End
+    # # # # Create session and initialize.
+    # # # session = tf.Session(graph=g)
+    # # # session.run(init_op)
+    # # # ## Similarity - End
 
     status = 'welcome' # welcome, camera, voice, result
     main()
