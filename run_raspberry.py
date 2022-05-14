@@ -453,10 +453,14 @@ if __name__ == '__main__':
     ## Similarity
     ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
     module_url = ROOT_DIR+"/module"
+    print("9")
     
     g = tf.Graph()
+    print("10")
     with g.as_default():
+        print("11")
         text_input = tf.placeholder(dtype=tf.string, shape=[None])
+        print("12")
         embed = hub.load(module_url)
         print("1")
         my_result = embed(text_input)
