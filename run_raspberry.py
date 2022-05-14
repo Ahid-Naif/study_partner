@@ -135,6 +135,10 @@ def decode_predictions(scores, geometry):
 
 def check1(text):
     global status
+    global waiting
+    global pressed_time
+    global pressed
+    global long_pressed
     # display the text OCR'd by Tesseract
     print("TEXT")
     print("========")
@@ -177,6 +181,10 @@ def check1(text):
 
 def ocrProgram():
     global status
+    global waiting
+    global pressed_time
+    global pressed
+    global long_pressed
     print("[INFO] starting video stream...")
     camera = PiCamera()
     camera.resolution = (640, 480)
@@ -281,9 +289,10 @@ def ocrProgram():
                         main()
                     else:
                         status = 'voice'
+                        pressed = False
+                        long_pressed = False
                         break
-                    pressed = False
-                    long_pressed = False
+                    
 
                 elif GPIO.input(5) == GPIO.HIGH:
                     pressed_time = time.time()
@@ -365,6 +374,10 @@ def callback(indata, frames, time, status):
 
 def voiceProgram():
     results_voice = []
+    global waiting
+    global pressed_time
+    global pressed
+    global long_pressed
     img = cv2.imread('screens/mic.jpg')
     while True:
         cv2.imshow("window", img)
@@ -465,6 +478,10 @@ def voiceProgram():
 
 def check2(results_voice):
     global status
+    global waiting
+    global pressed_time
+    global pressed
+    global long_pressed
     # display the text OCR'd by Tesseract
     print("TEXT")
     print("========")
@@ -508,6 +525,10 @@ def check2(results_voice):
 
 def similarityProgram():
     global status
+    global waiting
+    global pressed_time
+    global pressed
+    global long_pressed
     #open text file in read mode
     ocr = open("ocr.txt", "r")
     ocr_data = ocr.read()
