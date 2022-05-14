@@ -349,55 +349,55 @@ def similarityProgram():
     # print(ocr_data)
     # print(speech_data)
 
-    my_result_out = session.run(
-        my_result, feed_dict={text_input: [ocr_data.lower(), speech_data.lower()]})
-    # print(my_result_out)
-    corr = np.inner(my_result_out, my_result_out)
+    # my_result_out = session.run(
+    #     my_result, feed_dict={text_input: [ocr_data.lower(), speech_data.lower()]})
+    # # print(my_result_out)
+    # corr = np.inner(my_result_out, my_result_out)
 
-    # print('Result is: ')
-    result = float("{:.2f}".format(corr[0][1]))*100
-    start_time = time.time()
-    cap = cv2.VideoCapture('screens/processing.mp4')
-    while(cap.isOpened()):
-        ret, frame = cap.read() 
-        cv2.namedWindow("window", cv2.WND_PROP_FULLSCREEN)
-        cv2.setWindowProperty("window",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
-        if ret:
-            cv2.imshow("window", frame)
-        else:
-        #    print('no video')
-           cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
-           continue
-        cv2.waitKey(1)
-        if time.time() - start_time > 2:
-            cap.release()
-            cv2.destroyAllWindows()
-            break
-        time.sleep(0.03333) # 30 fps
+    # # print('Result is: ')
+    # result = float("{:.2f}".format(corr[0][1]))*100
+    # start_time = time.time()
+    # cap = cv2.VideoCapture('screens/processing.mp4')
+    # while(cap.isOpened()):
+    #     ret, frame = cap.read() 
+    #     cv2.namedWindow("window", cv2.WND_PROP_FULLSCREEN)
+    #     cv2.setWindowProperty("window",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
+    #     if ret:
+    #         cv2.imshow("window", frame)
+    #     else:
+    #     #    print('no video')
+    #        cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+    #        continue
+    #     cv2.waitKey(1)
+    #     if time.time() - start_time > 2:
+    #         cap.release()
+    #         cv2.destroyAllWindows()
+    #         break
+    #     time.sleep(0.03333) # 30 fps
 
-    if result > 70:
-        cap = cv2.VideoCapture('screens/happy.mp4')
-    elif result >= 40 and result <= 70:
-        cap = cv2.VideoCapture('screens/neutral.mp4')
-    elif result < 40:
-        cap = cv2.VideoCapture('screens/sad.mp4')
+    # if result > 70:
+    #     cap = cv2.VideoCapture('screens/happy.mp4')
+    # elif result >= 40 and result <= 70:
+    #     cap = cv2.VideoCapture('screens/neutral.mp4')
+    # elif result < 40:
+    #     cap = cv2.VideoCapture('screens/sad.mp4')
 
-    while(cap.isOpened()):
-        ret, frame = cap.read() 
-        cv2.namedWindow("window", cv2.WND_PROP_FULLSCREEN)
-        cv2.setWindowProperty("window",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
-        if ret:
-            cv2.imshow("window", frame)
-        else:
-        #    print('no video')
-           cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
-           continue
-        if cv2.waitKey(1) & 0xFF == 32:
-            cap.release()
-            cv2.destroyAllWindows()
-            break
-        time.sleep(0.03333) # 30 fps
-    # print(result)
+    # while(cap.isOpened()):
+    #     ret, frame = cap.read() 
+    #     cv2.namedWindow("window", cv2.WND_PROP_FULLSCREEN)
+    #     cv2.setWindowProperty("window",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
+    #     if ret:
+    #         cv2.imshow("window", frame)
+    #     else:
+    #     #    print('no video')
+    #        cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+    #        continue
+    #     if cv2.waitKey(1) & 0xFF == 32:
+    #         cap.release()
+    #         cv2.destroyAllWindows()
+    #         break
+    #     time.sleep(0.03333) # 30 fps
+    # # print(result)
     status = 'welcome'
     main()
 
@@ -454,18 +454,18 @@ if __name__ == '__main__':
     ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
     module_url = ROOT_DIR+"/module"
     
-    g = tf.Graph()
-    with g.as_default():
-        text_input = tf.placeholder(dtype=tf.string, shape=[None])
-        embed = hub.load(module_url)
-        my_result = embed(text_input)
-        init_op = tf.group(
-            [tf.global_variables_initializer(), tf.tables_initializer()])
-    g.finalize()
+    # g = tf.Graph()
+    # with g.as_default():
+    #     text_input = tf.placeholder(dtype=tf.string, shape=[None])
+    #     embed = hub.load(module_url)
+    #     my_result = embed(text_input)
+    #     init_op = tf.group(
+    #         [tf.global_variables_initializer(), tf.tables_initializer()])
+    # g.finalize()
     
-    # Create session and initialize.
-    session = tf.Session(graph=g)
-    session.run(init_op)
+    # # Create session and initialize.
+    # session = tf.Session(graph=g)
+    # session.run(init_op)
     ## Similarity - End
 
     status = 'welcome' # welcome, camera, voice, result
