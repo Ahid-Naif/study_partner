@@ -1,5 +1,3 @@
-from multiprocessing.connection import wait
-from unittest import result
 from imutils.object_detection import non_max_suppression
 import numpy as np
 import pytesseract
@@ -12,7 +10,6 @@ import sounddevice as sd # قراءة الصوت من الميكروفون
 import vosk # تحويل الصوت إلى نص
 import sys
 import json
-from datetime import datetime
 import tensorflow_hub as hub
 import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
@@ -21,11 +18,20 @@ import re
 from textblob import TextBlob
 from picamera.array import PiRGBArray
 from picamera import PiCamera
+import RPi.GPIO as GPIO # Import Raspberry Pi GPIO library
+
+GPIO.setwarnings(False) # Ignore warning for now
+GPIO.setmode(GPIO.BCM) # Use physical pin numbering
+GPIO.setup(5, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) # Set pin 5 to be an input pin and set initial value to be pulled low (off)
+
+waiting = False
+pressed = False
+long_pressed = False
+pressed_time = time.time()
+start_time = time.time()
 
 def welcomeScreen():
     global status
-    # print('welcome')
-    # print('Press (y) to start')
     cap = cv2.VideoCapture('screens/welcome.mp4')
     while(cap.isOpened()):
         ret, frame = cap.read() 
@@ -35,7 +41,6 @@ def welcomeScreen():
         if ret:
             cv2.imshow("window", frame)
         else:
-        #    print('no video')
            cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
            continue
 
@@ -46,6 +51,27 @@ def welcomeScreen():
             main()
             # break
         time.sleep(0.03333) # 30 fps
+
+        if waiting:
+            if(time.time() - pressed_time)*1000 >= 20:
+                if GPIO.input(5) == GPIO.HIGH:
+                    pressed = True
+            if time.time() - pressed_time > 1:
+                waiting = False
+                if GPIO.input(5) == GPIO.HIGH:
+                    long_pressed = True
+        else:
+            if pressed:
+                pressed = False
+                long_pressed = False
+                cap.release()
+                cv2.destroyAllWindows()
+                status = 'camera'
+                main()
+    
+            elif GPIO.input(5) == GPIO.HIGH:
+                pressed_time = time.time()
+                waiting = True
     # while True:
         # if keyboard.read_key() == "y":
         #     cap.release()
@@ -111,14 +137,38 @@ def check1(text):
 
     print('Press (y) for yes, or (n) for no')
     while True:
-        if keyboard.read_key() == "y":
-            ocr_file = open("ocr.txt", "w")
-            ocr_file.write(text)
-            ocr_file.close()
-            main()
-        elif keyboard.read_key() == "n":
-            status = 'camera'
-            main()
+        if waiting:
+            if(time.time() - pressed_time)*1000 >= 20:
+                if GPIO.input(5) == GPIO.HIGH:
+                    pressed = True
+            if time.time() - pressed_time > 1:
+                waiting = False
+                if GPIO.input(5) == GPIO.HIGH:
+                    long_pressed = True
+        else:
+            if pressed:
+                if long_pressed:
+                    status = 'camera'
+                    main()
+                else:
+                    ocr_file = open("ocr.txt", "w")
+                    ocr_file.write(text)
+                    ocr_file.close()
+                    pressed = False
+                    long_pressed = False
+                    main()
+
+            elif GPIO.input(5) == GPIO.HIGH:
+                pressed_time = time.time()
+                waiting = True
+        # if keyboard.read_key() == "y":
+        #     ocr_file = open("ocr.txt", "w")
+        #     ocr_file.write(text)
+        #     ocr_file.close()
+        #     main()
+        # elif keyboard.read_key() == "n":
+        #     status = 'camera'
+        #     main()
 
 def ocrProgram():
     global status
@@ -208,15 +258,36 @@ def ocrProgram():
             cv2.imshow('OCR', output)
             isOCR = True
 
-            key = cv2.waitKey(1)
-            if key == ord("y"):
-                status = 'voice'
-                break
-            elif key == ord("n"):
-                status = 'welcome'
-                vs.release()
-                cv2.destroyAllWindows()
-                main()
+            cv2.waitKey(1)
+            if waiting:
+                if(time.time() - pressed_time)*1000 >= 20:
+                    if GPIO.input(5) == GPIO.HIGH:
+                        pressed = True
+                if time.time() - pressed_time > 1:
+                    waiting = False
+                    if GPIO.input(5) == GPIO.HIGH:
+                        long_pressed = True
+            else:
+                if pressed:
+                    if long_pressed:
+                        status = 'welcome'
+                        vs.release()
+                        cv2.destroyAllWindows()
+                        main()
+                    else:
+                        status = 'voice'
+                        break
+                    pressed = False
+                    long_pressed = False
+
+                elif GPIO.input(5) == GPIO.HIGH:
+                    pressed_time = time.time()
+                    waiting = True
+
+            # if key == ord("y"):
+                
+            # elif key == ord("n"):
+                
         else:
             if isOCR == True:
                 cv2.destroyWindow('OCR')
@@ -227,12 +298,36 @@ def ocrProgram():
             cv2.imshow("Video", output)
             isOCR = False
 
-            key = cv2.waitKey(1)
-            if key == ord("n"):
-                status = 'welcome'
-                vs.release()
-                cv2.destroyAllWindows()
-                main()
+            cv2.waitKey(1)
+            if waiting:
+                if(time.time() - pressed_time)*1000 >= 20:
+                    if GPIO.input(5) == GPIO.HIGH:
+                        pressed = True
+                if time.time() - pressed_time > 1:
+                    waiting = False
+                    if GPIO.input(5) == GPIO.HIGH:
+                        long_pressed = True
+            else:
+                if pressed:
+                    if long_pressed:
+                        status = 'welcome'
+                        vs.release()
+                        cv2.destroyAllWindows()
+                        main()
+                    # else:
+                    #     print("Button is pressed")
+                    pressed = False
+                    long_pressed = False
+
+                elif GPIO.input(5) == GPIO.HIGH:
+                    pressed_time = time.time()
+                    waiting = True
+
+            # if key == ord("n"):
+            #     status = 'welcome'
+            #     vs.release()
+            #     cv2.destroyAllWindows()
+            #     main()
 
     # extract the actual padded ROI
     roi = orig[startY:endY, startX:endX]
@@ -268,8 +363,25 @@ def voiceProgram():
     img = cv2.imread('screens/mic.jpg')
     while True:
         cv2.imshow("window", img)
-        if cv2.waitKey(1) & 0xFF == 32:
-            break
+        if waiting:
+            if(time.time() - pressed_time)*1000 >= 20:
+                if GPIO.input(5) == GPIO.HIGH:
+                    pressed = True
+            if time.time() - pressed_time > 1:
+                waiting = False
+                if GPIO.input(5) == GPIO.HIGH:
+                    long_pressed = True
+        else:
+            if pressed:
+                pressed = False
+                long_pressed = False
+                break
+
+            elif GPIO.input(5) == GPIO.HIGH:
+                pressed_time = time.time()
+                waiting = True
+        # if cv2.waitKey(1) & 0xFF == 32:
+        #     break
     cv2.destroyAllWindows()
 
     cap = cv2.VideoCapture('screens/listening.mp4')
@@ -296,24 +408,55 @@ def voiceProgram():
         else:
             partial = rec.PartialResult() # تم تحويل الصوت إلى نص
         
-        if cv2.waitKey(1) & 0xFF == 32:
-            start_time2= time.time()
-            while True:
-                data = q.get()
-                if rec.AcceptWaveform(data):
-                    sentence = rec.Result() # تم تحويل الصوت إلى نص
-                    sentence = json.loads(sentence)
-                    results_voice.append(sentence.get("text", ""))
-                else:
-                    partial = rec.PartialResult() # تم تحويل الصوت إلى نص
+        if waiting:
+            if(time.time() - pressed_time)*1000 >= 20:
+                if GPIO.input(5) == GPIO.HIGH:
+                    pressed = True
+            if time.time() - pressed_time > 1:
+                waiting = False
+                if GPIO.input(5) == GPIO.HIGH:
+                    long_pressed = True
+        else:
+            if pressed:
+                start_time2= time.time()
+                while True:
+                    data = q.get()
+                    if rec.AcceptWaveform(data):
+                        sentence = rec.Result() # تم تحويل الصوت إلى نص
+                        sentence = json.loads(sentence)
+                        results_voice.append(sentence.get("text", ""))
+                    else:
+                        partial = rec.PartialResult() # تم تحويل الصوت إلى نص
+
+                    if time.time() - start_time2 > 2:
+                        break
+                cap.release()
+                cv2.destroyAllWindows()
+                results_voice = " ".join(results_voice)
+                soundStream.stop()
+                check2(results_voice)
+
+            elif GPIO.input(5) == GPIO.HIGH:
+                pressed_time = time.time()
+                waiting = True
+        # if cv2.waitKey(1) & 0xFF == 32:
+        #     start_time2= time.time()
+        #     while True:
+        #         data = q.get()
+        #         if rec.AcceptWaveform(data):
+        #             sentence = rec.Result() # تم تحويل الصوت إلى نص
+        #             sentence = json.loads(sentence)
+        #             results_voice.append(sentence.get("text", ""))
+        #         else:
+        #             partial = rec.PartialResult() # تم تحويل الصوت إلى نص
             
-                if time.time() - start_time2 > 2:
-                    break
-            cap.release()
-            cv2.destroyAllWindows()
-            results_voice = " ".join(results_voice)
-            soundStream.stop()
-            check2(results_voice)
+        #         if time.time() - start_time2 > 2:
+        #             break
+        #     cap.release()
+        #     cv2.destroyAllWindows()
+        #     results_voice = " ".join(results_voice)
+        #     soundStream.stop()
+        #     check2(results_voice)
 
 def check2(results_voice):
     global status
@@ -324,15 +467,39 @@ def check2(results_voice):
 
     print('Press (y) for yes, or (n) for no')
     while True:
-        if keyboard.read_key() == "y":
-            speech_file = open("speech.txt", "w")
-            speech_file.write(results_voice)
-            speech_file.close()
-            status = 'result'
-            main()
+        if waiting:
+            if(time.time() - pressed_time)*1000 >= 20:
+                if GPIO.input(5) == GPIO.HIGH:
+                    pressed = True
+            if time.time() - pressed_time > 1:
+                waiting = False
+                if GPIO.input(5) == GPIO.HIGH:
+                    long_pressed = True
+        else:
+            if pressed:
+                if long_pressed:
+                    voiceProgram()
+                else:
+                    speech_file = open("speech.txt", "w")
+                    speech_file.write(results_voice)
+                    speech_file.close()
+                    status = 'result'
+                    main()
+                pressed = False
+                long_pressed = False
 
-        elif keyboard.read_key() == "n":
-            voiceProgram()
+            elif GPIO.input(5) == GPIO.HIGH:
+                pressed_time = time.time()
+                waiting = True
+        # if keyboard.read_key() == "y":
+        #     # speech_file = open("speech.txt", "w")
+        #     # speech_file.write(results_voice)
+        #     # speech_file.close()
+        #     # status = 'result'
+        #     # main()
+
+        # elif keyboard.read_key() == "n":
+        #     voiceProgram()
 
 def similarityProgram():
     global status
@@ -357,23 +524,41 @@ def similarityProgram():
     # # print('Result is: ')
     # result = float("{:.2f}".format(corr[0][1]))*100
     # start_time = time.time()
-    # cap = cv2.VideoCapture('screens/processing.mp4')
-    # while(cap.isOpened()):
-    #     ret, frame = cap.read() 
-    #     cv2.namedWindow("window", cv2.WND_PROP_FULLSCREEN)
-    #     cv2.setWindowProperty("window",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
-    #     if ret:
-    #         cv2.imshow("window", frame)
-    #     else:
-    #     #    print('no video')
-    #        cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
-    #        continue
-    #     cv2.waitKey(1)
-    #     if time.time() - start_time > 2:
-    #         cap.release()
-    #         cv2.destroyAllWindows()
-    #         break
-    #     time.sleep(0.03333) # 30 fps
+    cap = cv2.VideoCapture('screens/processing.mp4')
+    while(cap.isOpened()):
+        ret, frame = cap.read() 
+        cv2.namedWindow("window", cv2.WND_PROP_FULLSCREEN)
+        cv2.setWindowProperty("window",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
+        if ret:
+            cv2.imshow("window", frame)
+        else:
+           cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+           continue
+        cv2.waitKey(1)
+        if waiting:
+            if(time.time() - pressed_time)*1000 >= 20:
+                if GPIO.input(5) == GPIO.HIGH:
+                    pressed = True
+            if time.time() - pressed_time > 1:
+                waiting = False
+                if GPIO.input(5) == GPIO.HIGH:
+                    long_pressed = True
+        else:
+            if pressed:
+                cap.release()
+                cv2.destroyAllWindows()
+                pressed = False
+                long_pressed = False
+                break
+
+            elif GPIO.input(5) == GPIO.HIGH:
+                pressed_time = time.time()
+                waiting = True
+        # if time.time() - start_time > 2:
+        #     cap.release()
+        #     cv2.destroyAllWindows()
+        #     break
+        time.sleep(0.03333) # 30 fps
 
     # if result > 70:
     #     cap = cv2.VideoCapture('screens/happy.mp4')
