@@ -1,3 +1,4 @@
+from glob import glob
 from imutils.object_detection import non_max_suppression
 import numpy as np
 import pytesseract
@@ -33,6 +34,9 @@ start_time = time.time()
 def welcomeScreen():
     global status
     global waiting
+    global pressed_time
+    global pressed
+    global long_pressed
     cap = cv2.VideoCapture('screens2/welcome.mp4')
     while(cap.isOpened()):
         ret, frame = cap.read() 
