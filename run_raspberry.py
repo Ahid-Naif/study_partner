@@ -432,49 +432,41 @@ if __name__ == '__main__':
     # define the two output layer names for the EAST detector model that
     # we are interested in -- the first is the output probabilities and the
     # second can be used to derive the bounding box coordinates of text
-    # layerNames = [
-    #     "feature_fusion/Conv_7/Sigmoid",
-    #     "feature_fusion/concat_3"]
+    layerNames = [
+        "feature_fusion/Conv_7/Sigmoid",
+        "feature_fusion/concat_3"]
     
-    # # load the pre-trained EAST text detector
-    # print("[INFO] loading EAST text detector...")
-    # net = cv2.dnn.readNet(args["east"])
+    # load the pre-trained EAST text detector
+    print("[INFO] loading EAST text detector...")
+    net = cv2.dnn.readNet(args["east"])
     
-    # ## Vosk
-    # # تعريف مكتبة queue
-    # q = queue.Queue()
-    # samplerate = 48000
-    # model = vosk.Model("model")
-    # rec = vosk.KaldiRecognizer(model, samplerate)
-    # rec.SetWords(True)
-    # soundStream = sd.RawInputStream(samplerate=samplerate, blocksize = 8000, dtype='int16', channels=1, callback=callback)
-    # ## Vosk - End
+    ## Vosk
+    # تعريف مكتبة queue
+    q = queue.Queue()
+    samplerate = 48000
+    model = vosk.Model("model")
+    rec = vosk.KaldiRecognizer(model, samplerate)
+    rec.SetWords(True)
+    soundStream = sd.RawInputStream(samplerate=samplerate, blocksize = 8000, dtype='int16', channels=1, callback=callback)
+    ## Vosk - End
     
     ## Similarity
     ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
     module_url = ROOT_DIR+"/module"
-    print("9")
     
     g = tf.Graph()
-    print("10")
     with g.as_default():
-        print("11")
         text_input = tf.placeholder(dtype=tf.string, shape=[None])
-        print("12")
         embed = hub.load(module_url)
-        print("1")
         my_result = embed(text_input)
-        print("2")
         init_op = tf.group(
             [tf.global_variables_initializer(), tf.tables_initializer()])
-        print("3")
     g.finalize()
-    print("4")
     
     # Create session and initialize.
     session = tf.Session(graph=g)
     session.run(init_op)
-    # Similarity - End
+    ## Similarity - End
 
     status = 'welcome' # welcome, camera, voice, result
     main()
