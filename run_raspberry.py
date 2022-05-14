@@ -32,11 +32,11 @@ start_time = time.time()
 
 def welcomeScreen():
     global status
-    cap = cv2.VideoCapture('screens/welcome.mp4')
+    cap = cv2.VideoCapture('screens2/welcome.mp4')
     while(cap.isOpened()):
         ret, frame = cap.read() 
-        cv2.namedWindow("window", cv2.WND_PROP_FULLSCREEN)
-        cv2.setWindowProperty("window",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
+        # cv2.namedWindow("window", cv2.WND_PROP_FULLSCREEN)
+        # cv2.setWindowProperty("window",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
     
         if ret:
             cv2.imshow("window", frame)
