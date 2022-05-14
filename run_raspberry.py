@@ -20,6 +20,7 @@ from textblob import TextBlob
 from picamera.array import PiRGBArray
 from picamera import PiCamera
 import RPi.GPIO as GPIO # Import Raspberry Pi GPIO library
+import io
 
 GPIO.setwarnings(False) # Ignore warning for now
 GPIO.setmode(GPIO.BCM) # Use physical pin numbering
@@ -190,10 +191,13 @@ def ocrProgram():
     camera.resolution = (640, 480)
     camera.framerate = 32
     rawCapture = PiRGBArray(camera, size=(640, 480))
+    stream = io.BytesIO()
     # allow the camera to warmup
     time.sleep(0.1)
     # capture frames from the camera
-    for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
+    for frame in camera.capture_continuous(stream, format="bgr", use_video_port=True):
+        stream.truncate()
+        stream.seek(0)
         # grab the raw NumPy array representing the image, then initialize the timestamp
         # and occupied/unoccupied text
         # image = frame.array
