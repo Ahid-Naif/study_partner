@@ -472,9 +472,9 @@ if __name__ == '__main__':
     print("4")
     
     # Create session and initialize.
-    # session = tf.Session(graph=g)
-    # session.run(init_op)
-    ## Similarity - End
+    session = tf.Session(graph=g)
+    session.run(init_op)
+    # Similarity - End
 
     status = 'welcome' # welcome, camera, voice, result
     main()
