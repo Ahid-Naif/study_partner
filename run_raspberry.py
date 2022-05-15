@@ -268,6 +268,7 @@ def ocrProgram():
             endY = min(origH, endY + (dY * 2))
 
         output = orig.copy()
+        output = cv2.resize(output, (640, 480))
         if(not isinstance(boxes, list)):
             if isOCR == False:
                 cv2.destroyWindow('Video')
