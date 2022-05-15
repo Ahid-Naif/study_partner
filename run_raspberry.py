@@ -546,27 +546,57 @@ def similarityProgram():
     
     ocr_data = re.sub(r'[^\w]', ' ', ocr_data).rstrip()
     speech_data = re.sub(r'[^\w]', ' ', speech_data).rstrip()
-    # print(ocr_data)
-    # print(speech_data)
 
-    # my_result_out = session.run(
-    #     my_result, feed_dict={text_input: [ocr_data.lower(), speech_data.lower()]})
-    # # print(my_result_out)
-    # corr = np.inner(my_result_out, my_result_out)
+    myobj = {'a': ocr_data, 'b': speech_data}
+    myobj =  json.dumps(myobj)
 
-    # # print('Result is: ')
-    # result = float("{:.2f}".format(corr[0][1]))*100
-    # start_time = time.time()
+    try:
+        x = requests.post('https://hammerhead-app-lnodz.ondigitalocean.app/similar', data = myobj)
+    except HTTPError as e:
+        pass
+    time.sleep(5)
+   
     cap = cv2.VideoCapture('screens2/processing.mp4')
+    start_time = time.time()
     while(cap.isOpened()):
-        ret, frame = cap.read() 
-        cv2.namedWindow("window", cv2.WND_PROP_FULLSCREEN)
-        cv2.setWindowProperty("window",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
+        ret, frame = cap.read()
         if ret:
             cv2.imshow("window", frame)
         else:
            cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
            continue
+        
+        if time.time() - start_time > 5:
+            try:
+                x = requests.get('https://hammerhead-app-lnodz.ondigitalocean.app/getResult')
+                result = x.text
+                if result != "":
+                    result = float(x.text)
+                    cap.release()
+                    cv2.destroyAllWindows()
+                    break
+            except HTTPError as e:
+                print(e)    
+            start_time = time.time()
+           
+        time.sleep(0.03333) # 30 fps
+        cv2.waitKey(1)
+
+    if result > 70.0:
+        cap2 = cv2.VideoCapture('screens2/happy.mp4')
+    elif result >= 40.0 and result <= 70.0:
+        cap2 = cv2.VideoCapture('screens2/neutral.mp4')
+    elif result < 40.0:
+        cap2 = cv2.VideoCapture('screens2/sad.mp4')
+
+    while(cap2.isOpened()):
+        ret, frame = cap2.read() 
+        if ret:
+            cv2.imshow("window", frame)
+        else:
+           cap2.set(cv2.CAP_PROP_POS_FRAMES, 0)
+           continue
+        time.sleep(0.09999) # 30 fps
         cv2.waitKey(1)
         if waiting:
             if(time.time() - pressed_time)*1000 >= 20:
@@ -578,50 +608,18 @@ def similarityProgram():
                     long_pressed = True
         else:
             if pressed:
-                cap.release()
-                cv2.destroyAllWindows()
-                pressed = False
-                long_pressed = False
                 break
 
             elif GPIO.input(5) == GPIO.HIGH:
                 pressed_time = time.time()
                 waiting = True
-        # if time.time() - start_time > 2:
-        #     cap.release()
-        #     cv2.destroyAllWindows()
-        #     break
-        time.sleep(0.03333) # 30 fps
 
-    # if result > 70:
-    #     cap = cv2.VideoCapture('screens/happy.mp4')
-    # elif result >= 40 and result <= 70:
-    #     cap = cv2.VideoCapture('screens/neutral.mp4')
-    # elif result < 40:
-    #     cap = cv2.VideoCapture('screens/sad.mp4')
-
-    # while(cap.isOpened()):
-    #     ret, frame = cap.read() 
-    #     cv2.namedWindow("window", cv2.WND_PROP_FULLSCREEN)
-    #     cv2.setWindowProperty("window",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
-    #     if ret:
-    #         cv2.imshow("window", frame)
-    #     else:
-    #     #    print('no video')
-    #        cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
-    #        continue
-    #     if cv2.waitKey(1) & 0xFF == 32:
-    #         cap.release()
-    #         cv2.destroyAllWindows()
-    #         break
-    #     time.sleep(0.03333) # 30 fps
-    # # print(result)
     status = 'welcome'
     main()
 
 def main():
     while True:
-        voiceProgram()
+        similarityProgram()
         if status == 'welcome':
             welcomeScreen()
         elif status == 'camera':
