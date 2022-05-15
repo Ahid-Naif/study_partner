@@ -389,7 +389,7 @@ def voiceProgram():
     global pressed_time
     global pressed
     global long_pressed
-    img = cv2.imread('screens/mic.jpg')
+    img = cv2.imread('screens2/mic.jpg')
     cv2.waitKey(1)
     while True:
         cv2.imshow("window", img)
@@ -414,7 +414,7 @@ def voiceProgram():
         #     break
     cv2.destroyAllWindows()
 
-    cap = cv2.VideoCapture('screens/listening.mp4')
+    cap = cv2.VideoCapture('screens2/listening.mp4')
     soundStream.start()
     start_time = time.time()
     while(cap.isOpened()):
@@ -562,7 +562,7 @@ def similarityProgram():
     # # print('Result is: ')
     # result = float("{:.2f}".format(corr[0][1]))*100
     # start_time = time.time()
-    cap = cv2.VideoCapture('screens/processing.mp4')
+    cap = cv2.VideoCapture('screens2/processing.mp4')
     while(cap.isOpened()):
         ret, frame = cap.read() 
         cv2.namedWindow("window", cv2.WND_PROP_FULLSCREEN)
