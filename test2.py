@@ -5,7 +5,6 @@ import imutils
 from imutils.video import WebcamVideoStream
  
 cap = WebcamVideoStream(src=0).start()
-cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
  
 while True:
     # Capture frame-by-frame
