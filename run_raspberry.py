@@ -221,6 +221,8 @@ def ocrProgram():
         #     break
         
         # Our operations on the frame come here
+        frame = cv2.resize(frame, (478, 358))
+
         orig = frame.copy()
         (origH, origW) = frame.shape[:2]
         # set the new width and height and then determine the ratio in change
@@ -268,7 +270,6 @@ def ocrProgram():
             endY = min(origH, endY + (dY * 2))
 
         output = orig.copy()
-        output = cv2.resize(output, (640, 480))
         if(not isinstance(boxes, list)):
             if isOCR == False:
                 cv2.destroyWindow('Video')
