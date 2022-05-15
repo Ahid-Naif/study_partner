@@ -454,6 +454,7 @@ def voiceProgram():
             if pressed:
                 pressed = False
                 long_pressed = False
+                time.sleep(1)
                 cap.release()
                 cv2.destroyAllWindows()
                 results_voice = " ".join(results_voice)
