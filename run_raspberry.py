@@ -268,8 +268,8 @@ def ocrProgram():
 
             cv2.rectangle(output, (startX, startY), (endX, endY),
             	(0, 0, 255), 2)
-            cv2.namedWindow("OCR", cv2.WND_PROP_FULLSCREEN) 
-            cv2.setWindowProperty("OCR", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+            # cv2.namedWindow("OCR", cv2.WND_PROP_FULLSCREEN) 
+            # cv2.setWindowProperty("OCR", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
             cv2.imshow('OCR', output)
             isOCR = True
 
@@ -309,8 +309,8 @@ def ocrProgram():
                 cv2.destroyWindow('OCR')
 
             # show the output image
-            cv2.namedWindow("Video", cv2.WND_PROP_FULLSCREEN) 
-            cv2.setWindowProperty("Video", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+            # cv2.namedWindow("Video", cv2.WND_PROP_FULLSCREEN) 
+            # cv2.setWindowProperty("Video", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
             cv2.imshow("Video", output)
             isOCR = False
 
@@ -410,8 +410,8 @@ def voiceProgram():
     while(cap.isOpened()):
         if time.time() - start_time > 0.03333:  # 30 fps
             ret, frame = cap.read() 
-            cv2.namedWindow("window", cv2.WND_PROP_FULLSCREEN)
-            cv2.setWindowProperty("window",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
+            # cv2.namedWindow("window", cv2.WND_PROP_FULLSCREEN)
+            # cv2.setWindowProperty("window",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
 
             if ret:
                 cv2.imshow("window", frame)
