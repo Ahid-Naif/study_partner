@@ -625,6 +625,7 @@ def similarityProgram():
 
 def main():
     while True:
+        voiceProgram()
         if status == 'welcome':
             welcomeScreen()
         elif status == 'camera':
