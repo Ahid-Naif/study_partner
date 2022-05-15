@@ -5,6 +5,7 @@ from imutils.object_detection import non_max_suppression
 from imutils.video import WebcamVideoStream
 from imutils.video import FPS
 import imutils
+import time
 
 # import datetime
 # from threading import Thread
@@ -146,10 +147,11 @@ stream = WebcamVideoStream(src=0).start()
 #     print("Cannot open camera")
 #     exit()
 
+ocr_start = time.time()
 while True:
     # Capture frame-by-frame
     frame = stream.read()
-    frame = imutils.resize(frame, width=239)
+    frame = imutils.resize(frame, width=400)
     # frame = cv2.resize(frame, (239, 179))
     # if frame is read correctly ret is True
     # if not ret:
@@ -174,37 +176,38 @@ while True:
     (H, W) = frame.shape[:2]
     # construct a blob from the image and then perform a forward pass of
     # the model to obtain the two output layer sets
-    blob = cv2.dnn.blobFromImage(frame, 1.0, (W, H),
-        (123.68, 116.78, 103.94), swapRB=True, crop=False)
-    net.setInput(blob)
-    (scores, geometry) = net.forward(layerNames)
-    # decode the predictions, then  apply non-maxima suppression to
-    # suppress weak, overlapping bounding boxes
-    (rects, confidences) = decode_predictions(scores, geometry)
-    boxes = non_max_suppression(np.array(rects), probs=confidences)
-    if(not isinstance(boxes, list)):
-        box = np.array(
-        [np.amin(boxes, axis=0)[0], np.amin(boxes, axis=0)[1], 
-        np.amax(boxes, axis=0)[2], np.amax(boxes, axis=0)[3]]
-        )
-        # loop over the bounding boxes
-        startX, startY, endX, endY = box
-        # scale the bounding box coordinates based on the respective
-        # ratios
-        startX = int(startX * rW)
-        startY = int(startY * rH)
-        endX = int(endX * rW)
-        endY = int(endY * rH)
-        # in order to obtain a better OCR of the text we can potentially
-        # apply a bit of padding surrounding the bounding box -- here we
-        # are computing the deltas in both the x and y directions
-        dX = int((endX - startX) * args["padding"])
-        dY = int((endY - startY) * args["padding"])
-        # apply padding to each side of the bounding box, respectively
-        startX = max(0, startX - dX)
-        startY = max(0, startY - dY)
-        endX = min(origW, endX + (dX * 2))
-        endY = min(origH, endY + (dY * 2))
+    if time.time() - ocr_start > 1:
+        blob = cv2.dnn.blobFromImage(frame, 1.0, (W, H),
+            (123.68, 116.78, 103.94), swapRB=True, crop=False)
+        net.setInput(blob)
+        (scores, geometry) = net.forward(layerNames)
+        # decode the predictions, then  apply non-maxima suppression to
+        # suppress weak, overlapping bounding boxes
+        (rects, confidences) = decode_predictions(scores, geometry)
+        boxes = non_max_suppression(np.array(rects), probs=confidences)
+        if(not isinstance(boxes, list)):
+            box = np.array(
+            [np.amin(boxes, axis=0)[0], np.amin(boxes, axis=0)[1], 
+            np.amax(boxes, axis=0)[2], np.amax(boxes, axis=0)[3]]
+            )
+            # loop over the bounding boxes
+            startX, startY, endX, endY = box
+            # scale the bounding box coordinates based on the respective
+            # ratios
+            startX = int(startX * rW)
+            startY = int(startY * rH)
+            endX = int(endX * rW)
+            endY = int(endY * rH)
+            # in order to obtain a better OCR of the text we can potentially
+            # apply a bit of padding surrounding the bounding box -- here we
+            # are computing the deltas in both the x and y directions
+            dX = int((endX - startX) * args["padding"])
+            dY = int((endY - startY) * args["padding"])
+            # apply padding to each side of the bounding box, respectively
+            startX = max(0, startX - dX)
+            startY = max(0, startY - dY)
+            endX = min(origW, endX + (dX * 2))
+            endY = min(origH, endY + (dY * 2))
 # When everything done, release the capture
 stream.stop()
 cv2.destroyAllWindows()
