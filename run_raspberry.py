@@ -1,19 +1,19 @@
-from glob import glob
+# from glob import glob
 from imutils.object_detection import non_max_suppression
 import numpy as np
 import pytesseract
 import argparse
 import cv2
 import time
-import keyboard
+# import keyboard
 import queue # تنظيم قراءة الصوت لعدم ضياع البيانات
 import sounddevice as sd # قراءة الصوت من الميكروفون
 import vosk # تحويل الصوت إلى نص
 import sys
 import json
-import tensorflow_hub as hub
-import tensorflow.compat.v1 as tf
-tf.disable_v2_behavior()
+# import tensorflow_hub as hub
+# import tensorflow.compat.v1 as tf
+# tf.disable_v2_behavior()
 import os
 import re
 from textblob import TextBlob
@@ -195,9 +195,7 @@ def ocrProgram():
     # allow the camera to warmup
     time.sleep(0.1)
     # capture frames from the camera
-    for frame in camera.capture_continuous(stream, format="bgr", use_video_port=True):
-        stream.truncate()
-        stream.seek(0)
+    for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
         # grab the raw NumPy array representing the image, then initialize the timestamp
         # and occupied/unoccupied text
         # image = frame.array
