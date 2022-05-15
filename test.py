@@ -149,7 +149,7 @@ stream = WebcamVideoStream(src=0).start()
 while True:
     # Capture frame-by-frame
     frame = stream.read()
-    frame = imutils.resize(frame, width=400)
+    frame = imutils.resize(frame, width=239)
     # frame = cv2.resize(frame, (239, 179))
     # if frame is read correctly ret is True
     # if not ret:
@@ -206,5 +206,5 @@ while True:
         endX = min(origW, endX + (dX * 2))
         endY = min(origH, endY + (dY * 2))
 # When everything done, release the capture
-stream.release()
+stream.stop()
 cv2.destroyAllWindows()
