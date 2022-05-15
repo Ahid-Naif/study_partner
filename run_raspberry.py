@@ -21,6 +21,8 @@ from picamera.array import PiRGBArray
 from picamera import PiCamera
 import RPi.GPIO as GPIO # Import Raspberry Pi GPIO library
 import io
+import requests
+from urllib.error import HTTPError
 
 GPIO.setwarnings(False) # Ignore warning for now
 GPIO.setmode(GPIO.BCM) # Use physical pin numbering
