@@ -222,6 +222,7 @@ def ocrProgram():
         
         # Our operations on the frame come here
         frame = cv2.resize(frame, (478, 358))
+        time.sleep(1)
 
         orig = frame.copy()
         (origH, origW) = frame.shape[:2]
