@@ -390,9 +390,10 @@ def voiceProgram():
     global pressed
     global long_pressed
     img = cv2.imread('screens2/mic.jpg')
-    cv2.waitKey(1)
     while True:
         cv2.imshow("window", img)
+        cv2.waitKey(1)
+
         if waiting:
             if(time.time() - pressed_time)*1000 >= 20:
                 if GPIO.input(5) == GPIO.HIGH:
