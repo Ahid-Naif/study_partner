@@ -419,6 +419,7 @@ def voiceProgram():
     cap = cv2.VideoCapture('screens2/listening.mp4')
     print("video capture")
     soundStream.start()
+    print("soundStream")
     start_time = time.time()
     while(cap.isOpened()):
         if time.time() - start_time > 0.03333:  # 30 fps
@@ -678,8 +679,8 @@ if __name__ == '__main__':
     ## Vosk - End
     
     ## Similarity
-    ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-    module_url = ROOT_DIR+"/module"
+    # ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+    # module_url = ROOT_DIR+"/module"
     
     # g = tf.Graph()
     # with g.as_default():
