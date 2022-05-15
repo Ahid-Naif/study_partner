@@ -148,13 +148,13 @@ stream = WebcamVideoStream(src=0).start()
 
 while True:
     # Capture frame-by-frame
-    (ret, frame) = stream.read()
+    frame = stream.read()
     frame = imutils.resize(frame, width=400)
     # frame = cv2.resize(frame, (239, 179))
     # if frame is read correctly ret is True
-    if not ret:
-        print("Can't receive frame (stream end?). Exiting ...")
-        break
+    # if not ret:
+    #     print("Can't receive frame (stream end?). Exiting ...")
+    #     break
     # Our operations on the frame come here
 
     # Display the resulting frame
