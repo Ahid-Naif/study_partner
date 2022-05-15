@@ -141,10 +141,10 @@ def decode_predictions(scores, geometry):
     return (rects, confidences)
 
 stream = WebcamVideoStream(src=0).start()
-fps = FPS().start()
-if not stream.isOpened():
-    print("Cannot open camera")
-    exit()
+# fps = FPS().start()
+# if not stream.isOpened():
+#     print("Cannot open camera")
+#     exit()
 
 while True:
     # Capture frame-by-frame
