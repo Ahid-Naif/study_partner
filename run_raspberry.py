@@ -621,7 +621,7 @@ def similarityProgram():
 
 def main():
     while True:
-        similarityProgram()
+        ocrProgram()
         if status == 'welcome':
             welcomeScreen()
         elif status == 'camera':
