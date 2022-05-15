@@ -2,6 +2,67 @@ import numpy as np
 import cv2
 import argparse
 from imutils.object_detection import non_max_suppression
+from imutils.video import WebcamVideoStream
+from imutils.video import FPS
+import imutils
+
+# import datetime
+# from threading import Thread
+
+# class FPS:
+#     def __init__(self):
+#         # store the start time, end time, and total number of frames
+#         # that were examined between the start and end intervals
+#         self._start = None
+#         self._end = None
+#         self._numFrames = 0
+#     def start(self):
+#         # start the timer
+#         self._start = datetime.datetime.now()
+#         return self
+#     def stop(self):
+#         # stop the timer
+#         self._end = datetime.datetime.now()
+#     def update(self):
+#         # increment the total number of frames examined during the
+#         # start and end intervals
+#         self._numFrames += 1
+#     def elapsed(self):
+#         # return the total number of seconds between the start and
+#         # end interval
+#         return (self._end - self._start).total_seconds()
+#     def fps(self):
+#         # compute the (approximate) frames per second
+#         return self._numFrames / self.elapsed()
+
+# class WebcamVideoStream:
+#     def __init__(self, src=0):
+#         # initialize the video camera stream and read the first frame
+#         # from the stream
+#         self.stream = cv2.VideoCapture(src)
+#         (self.grabbed, self.frame) = self.stream.read()
+#         # initialize the variable used to indicate if the thread should
+#         # be stopped
+#         self.stopped = False
+        
+#     def start(self):
+#         # start the thread to read frames from the video stream
+#         Thread(target=self.update, args=()).start()
+#         return self
+#     def update(self):
+#         # keep looping infinitely until the thread is stopped
+#         while True:
+#             # if the thread indicator variable is set, stop the thread
+#             if self.stopped:
+#                 return
+#             # otherwise, read the next frame from the stream
+#             (self.grabbed, self.frame) = self.stream.read()
+#     def read(self):
+#         # return the frame most recently read
+#         return self.frame
+#     def stop(self):
+#         # indicate that the thread should be stopped
+#         self.stopped = True
 
 # construct the argument parser and parse the arguments
 ap = argparse.ArgumentParser()
@@ -79,15 +140,17 @@ def decode_predictions(scores, geometry):
     # return a tuple of the bounding boxes and associated confidences
     return (rects, confidences)
 
-cap = cv2.VideoCapture(0)
-if not cap.isOpened():
+stream = WebcamVideoStream(src=0).start()
+fps = FPS().start()
+if not stream.isOpened():
     print("Cannot open camera")
     exit()
+
 while True:
     # Capture frame-by-frame
-    ret, frame = cap.read()
-    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    frame = cv2.resize(frame, (239, 179))
+    ret, frame = stream.read()
+    frame = imutils.resize(frame, width=400)
+    # frame = cv2.resize(frame, (239, 179))
     # if frame is read correctly ret is True
     if not ret:
         print("Can't receive frame (stream end?). Exiting ...")
@@ -143,5 +206,5 @@ while True:
         endX = min(origW, endX + (dX * 2))
         endY = min(origH, endY + (dY * 2))
 # When everything done, release the capture
-cap.release()
+stream.release()
 cv2.destroyAllWindows()
