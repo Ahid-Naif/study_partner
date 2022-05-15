@@ -177,6 +177,7 @@ while True:
     # construct a blob from the image and then perform a forward pass of
     # the model to obtain the two output layer sets
     if time.time() - ocr_start > 1:
+        ocr_start = time.time()
         blob = cv2.dnn.blobFromImage(frame, 1.0, (W, H),
             (123.68, 116.78, 103.94), swapRB=True, crop=False)
         net.setInput(blob)
