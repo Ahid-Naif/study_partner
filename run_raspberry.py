@@ -187,24 +187,30 @@ def ocrProgram():
     global pressed
     global long_pressed
     print("[INFO] starting video stream...")
-    camera = PiCamera()
-    camera.resolution = (640, 480)
-    camera.framerate = 32
-    rawCapture = PiRGBArray(camera, size=(640, 480))
-    stream = io.BytesIO()
+    # camera = PiCamera()
+    # camera.resolution = (640, 480)
+    # camera.framerate = 32
+    # rawCapture = PiRGBArray(camera, size=(640, 480))
+    # stream = io.BytesIO()
     # allow the camera to warmup
-    time.sleep(0.1)
+    vs = cv2.VideoCapture(0)
+    time.sleep(2.0)
+    if not vs.isOpened():
+        print("Cannot open camera")
+        exit()
+    isOCR = ''
     # capture frames from the camera
-    for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
-        # grab the raw NumPy array representing the image, then initialize the timestamp
-        # and occupied/unoccupied text
-        # image = frame.array
-        # vs = cv2.VideoCapture(0)
-        # time.sleep(2.0)
+    while True:
+        # Capture frame-by-frame
+        ret, frame = vs.read()
+        # if frame is read correctly ret is True
+        if not ret:
+            print("Can't receive frames")
+            break
     # if not vs.isOpened():
     #     print("Cannot open camera")
     #     exit()
-        isOCR = ''
+        # isOCR = ''
     # while True:
         # Capture frame-by-frame
         frame = frame.array
