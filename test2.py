@@ -1,13 +1,17 @@
 import cv2
 import pytesseract
 from pytesseract import Output
+import imutils
+from imutils.video import WebcamVideoStream
  
-cap = cv2.VideoCapture(0)
+cap = WebcamVideoStream(src=0).start()
 cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
  
 while True:
     # Capture frame-by-frame
-    ret, frame = cap.read()
+    frame = cap.read()
+    frame = imutils.resize(frame, width=400)
+
  
     d = pytesseract.image_to_data(frame, output_type=Output.DICT)
     n_boxes = len(d['text'])
@@ -25,5 +29,5 @@ while True:
         break
  
 # When everything done, release the capture
-cap.release()
+cap.stop()
 cv2.destroyAllWindows()
