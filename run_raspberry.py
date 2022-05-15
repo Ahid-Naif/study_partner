@@ -422,6 +422,7 @@ def voiceProgram():
     print("soundStream")
     start_time = time.time()
     while(cap.isOpened()):
+        print("loop")
         if time.time() - start_time > 0.03333:  # 30 fps
             ret, frame = cap.read() 
             # cv2.namedWindow("window", cv2.WND_PROP_FULLSCREEN)
