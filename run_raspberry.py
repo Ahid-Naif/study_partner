@@ -414,8 +414,10 @@ def voiceProgram():
         # if cv2.waitKey(1) & 0xFF == 32:
         #     break
     cv2.destroyAllWindows()
+    print("break")
 
     cap = cv2.VideoCapture('screens2/listening.mp4')
+    print("video capture")
     soundStream.start()
     start_time = time.time()
     while(cap.isOpened()):
