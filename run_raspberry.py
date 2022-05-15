@@ -417,9 +417,7 @@ def voiceProgram():
     print("break")
 
     cap = cv2.VideoCapture('screens2/listening.mp4')
-    print("video capture")
     soundStream.start()
-    print("soundStream")
     start_time = time.time()
     while(cap.isOpened()):
         # print("loop")
@@ -454,18 +452,8 @@ def voiceProgram():
                     long_pressed = True
         else:
             if pressed:
-                start_time2= time.time()
-                while True:
-                    data = q.get()
-                    if rec.AcceptWaveform(data):
-                        sentence = rec.Result() # تم تحويل الصوت إلى نص
-                        sentence = json.loads(sentence)
-                        results_voice.append(sentence.get("text", ""))
-                    else:
-                        partial = rec.PartialResult() # تم تحويل الصوت إلى نص
-
-                    if time.time() - start_time2 > 2:
-                        break
+                pressed = False
+                long_pressed = False
                 cap.release()
                 cv2.destroyAllWindows()
                 results_voice = " ".join(results_voice)
