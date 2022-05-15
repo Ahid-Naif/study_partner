@@ -213,7 +213,7 @@ def ocrProgram():
         # isOCR = ''
     # while True:
         # Capture frame-by-frame
-        frame = frame.array
+        # frame = frame.array
         # ret, frame = vs.read()
         # if frame is read correctly ret is True
         # if not ret:
