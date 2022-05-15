@@ -148,7 +148,7 @@ stream = WebcamVideoStream(src=0).start()
 
 while True:
     # Capture frame-by-frame
-    ret, frame = stream.read()
+    (ret, frame) = stream.read()
     frame = imutils.resize(frame, width=400)
     # frame = cv2.resize(frame, (239, 179))
     # if frame is read correctly ret is True
