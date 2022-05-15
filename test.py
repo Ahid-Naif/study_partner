@@ -86,7 +86,7 @@ if not cap.isOpened():
 while True:
     # Capture frame-by-frame
     ret, frame = cap.read()
-    frame = cv2.resize(frame, (478, 358))
+    frame = cv2.resize(frame, (239, 179))
     # if frame is read correctly ret is True
     if not ret:
         print("Can't receive frame (stream end?). Exiting ...")
