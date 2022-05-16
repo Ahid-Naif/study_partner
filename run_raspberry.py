@@ -400,6 +400,8 @@ def similarityProgram():
 
 def main():
     global status
+    print("status:")
+    print(status)
 
     while True:
         if status == 'welcome':
