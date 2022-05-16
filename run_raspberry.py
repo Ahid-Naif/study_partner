@@ -98,6 +98,8 @@ def check1(text):
             if pressed:
                 if long_pressed:
                     status = 'camera'
+                    pressed = False
+                    long_pressed = False
                     print('main--')
                     main()
                 else:
@@ -107,7 +109,7 @@ def check1(text):
                     pressed = False
                     long_pressed = False
                     print("voice")
-                    status == 'voice'
+                    status == "voice"
                     main()
 
             elif GPIO.input(5) == GPIO.HIGH:
@@ -200,6 +202,7 @@ def callback(indata, frames, time, status):
     q.put(bytes(indata))
 
 def voiceProgram():
+    print("voice start")
     results_voice = []
     global waiting
     global pressed_time
