@@ -106,6 +106,7 @@ def check1(text):
                     ocr_file.close()
                     pressed = False
                     long_pressed = False
+                    status == 'voice'
                     main()
 
             elif GPIO.input(5) == GPIO.HIGH:
