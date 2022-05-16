@@ -47,7 +47,7 @@ def welcomeScreen():
             cap.release()
             cv2.destroyAllWindows()
             status = 'camera'
-            main()
+            main(status)
             # break
         time.sleep(0.03333) # 30 fps
 
@@ -66,7 +66,7 @@ def welcomeScreen():
                 cap.release()
                 cv2.destroyAllWindows()
                 status = 'camera'
-                main()
+                main(status)
     
             elif GPIO.input(5) == GPIO.HIGH:
                 pressed_time = time.time()
@@ -101,7 +101,7 @@ def check1(text):
                     pressed = False
                     long_pressed = False
                     print('main--')
-                    main()
+                    main(status)
                 else:
                     ocr_file = open("ocr.txt", "w")
                     ocr_file.write(str(text))
@@ -110,7 +110,7 @@ def check1(text):
                     long_pressed = False
                     print("voice")
                     status == "voice"
-                    main()
+                    main(status)
 
             elif GPIO.input(5) == GPIO.HIGH:
                 pressed_time = time.time()
@@ -307,7 +307,7 @@ def check2(results_voice):
                     speech_file.write(results_voice)
                     speech_file.close()
                     status = 'result'
-                    main()
+                    main(status)
                 pressed = False
                 long_pressed = False
 
@@ -399,10 +399,9 @@ def similarityProgram():
                 pressed_time = time.time()
                 waiting = True
     status = 'welcome'
-    main()
+    main(status)
 
-def main():
-    global status
+def main(status):
     print("status:")
     print(status)
 
@@ -455,4 +454,4 @@ if __name__ == '__main__':
     ## Vosk - End
 
     status = 'welcome' # welcome, camera, voice, result
-    main()
+    main(status)
