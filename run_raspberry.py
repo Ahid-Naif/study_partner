@@ -1,12 +1,8 @@
-# from glob import glob
-from glob import glob
-from imutils.object_detection import non_max_suppression
 import numpy as np
 import pytesseract
 import argparse
 import cv2
 import time
-# import keyboard
 import queue # تنظيم قراءة الصوت لعدم ضياع البيانات
 import sounddevice as sd # قراءة الصوت من الميكروفون
 import vosk # تحويل الصوت إلى نص
@@ -14,8 +10,6 @@ import sys
 import json
 import re
 from textblob import TextBlob
-from picamera.array import PiRGBArray
-from picamera import PiCamera
 import RPi.GPIO as GPIO # Import Raspberry Pi GPIO library
 import requests
 from urllib.error import HTTPError
@@ -41,9 +35,7 @@ def welcomeScreen():
     global long_pressed
     cap = cv2.VideoCapture('screens2/welcome.mp4')
     while(cap.isOpened()):
-        ret, frame = cap.read() 
-        # cv2.namedWindow("window", cv2.WND_PROP_FULLSCREEN)
-        # cv2.setWindowProperty("window",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
+        ret, frame = cap.read()
     
         if ret:
             cv2.imshow("window", frame)
@@ -79,61 +71,6 @@ def welcomeScreen():
             elif GPIO.input(5) == GPIO.HIGH:
                 pressed_time = time.time()
                 waiting = True
-    # while True:
-        # if keyboard.read_key() == "y":
-        #     cap.release()
-        #     cv2.destroyAllWindows()
-        #     status = 'camera'
-        #     main()
-
-def decode_predictions(scores, geometry):
-    # grab the number of rows and columns from the scores volume, then
-    # initialize our set of bounding box rectangles and corresponding
-    # confidence scores
-    (numRows, numCols) = scores.shape[2:4]
-    rects = []
-    confidences = []
-    # loop over the number of rows
-    for y in range(0, numRows):
-        # extract the scores (probabilities), followed by the
-        # geometrical data used to derive potential bounding box
-        # coordinates that surround text
-        scoresData = scores[0, 0, y]
-        xData0 = geometry[0, 0, y]
-        xData1 = geometry[0, 1, y]
-        xData2 = geometry[0, 2, y]
-        xData3 = geometry[0, 3, y]
-        anglesData = geometry[0, 4, y]
-        # loop over the number of columns
-        for x in range(0, numCols):
-            # if our score does not have sufficient probability,
-            # ignore it
-            if scoresData[x] < args["min_confidence"]:
-                continue
-            # compute the offset factor as our resulting feature
-            # maps will be 4x smaller than the input image
-            (offsetX, offsetY) = (x * 4.0, y * 4.0)
-            # extract the rotation angle for the prediction and
-            # then compute the sin and cosine
-            angle = anglesData[x]
-            cos = np.cos(angle)
-            sin = np.sin(angle)
-            # use the geometry volume to derive the width and height
-            # of the bounding box
-            h = xData0[x] + xData2[x]
-            w = xData1[x] + xData3[x]
-            # compute both the starting and ending (x, y)-coordinates
-            # for the text prediction bounding box
-            endX = int(offsetX + (cos * xData1[x]) + (sin * xData2[x]))
-            endY = int(offsetY - (sin * xData1[x]) + (cos * xData2[x]))
-            startX = int(endX - w)
-            startY = int(endY - h)
-            # add the bounding box coordinates and probability score
-            # to our respective lists
-            rects.append((startX, startY, endX, endY))
-            confidences.append(scoresData[x])
-    # return a tuple of the bounding boxes and associated confidences
-    return (rects, confidences)
 
 def check1(text):
     global status
@@ -146,7 +83,7 @@ def check1(text):
     print("========")
     print("{}\n".format(text))
 
-    print('Press (y) for yes, or (n) for no')
+    print('Press (button) for yes, or hold (button) for no')
     while True:
         if waiting:
             if(time.time() - pressed_time)*1000 >= 20:
@@ -174,14 +111,6 @@ def check1(text):
             elif GPIO.input(5) == GPIO.HIGH:
                 pressed_time = time.time()
                 waiting = True
-        # if keyboard.read_key() == "y":
-        #     ocr_file = open("ocr.txt", "w")
-        #     ocr_file.write(text)
-        #     ocr_file.close()
-        #     main()
-        # elif keyboard.read_key() == "n":
-        #     status = 'camera'
-        #     main()
 
 def ocrProgram():
     global status
@@ -297,21 +226,14 @@ def voiceProgram():
             elif GPIO.input(5) == GPIO.HIGH:
                 pressed_time = time.time()
                 waiting = True
-        # if cv2.waitKey(1) & 0xFF == 32:
-        #     break
     cv2.destroyAllWindows()
-    print("break")
 
     cap = cv2.VideoCapture('screens2/listening.mp4')
     soundStream.start()
     start_time = time.time()
     while(cap.isOpened()):
-        # print("loop")
         if time.time() - start_time > 0.03333:  # 30 fps
-            ret, frame = cap.read() 
-            # cv2.namedWindow("window", cv2.WND_PROP_FULLSCREEN)
-            # cv2.setWindowProperty("window",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
-
+            ret, frame = cap.read()
             if ret:
                 cv2.imshow("window", frame)
                 cv2.waitKey(1)
@@ -350,24 +272,6 @@ def voiceProgram():
             elif GPIO.input(5) == GPIO.HIGH:
                 pressed_time = time.time()
                 waiting = True
-        # if cv2.waitKey(1) & 0xFF == 32:
-        #     start_time2= time.time()
-        #     while True:
-        #         data = q.get()
-        #         if rec.AcceptWaveform(data):
-        #             sentence = rec.Result() # تم تحويل الصوت إلى نص
-        #             sentence = json.loads(sentence)
-        #             results_voice.append(sentence.get("text", ""))
-        #         else:
-        #             partial = rec.PartialResult() # تم تحويل الصوت إلى نص
-            
-        #         if time.time() - start_time2 > 2:
-        #             break
-        #     cap.release()
-        #     cv2.destroyAllWindows()
-        #     results_voice = " ".join(results_voice)
-        #     soundStream.stop()
-        #     check2(results_voice)
 
 def check2(results_voice):
     global status
@@ -380,7 +284,7 @@ def check2(results_voice):
     print("========")
     print("{}\n".format(results_voice))
 
-    print('Press (y) for yes, or (n) for no')
+    print('Press (button) for yes, or hold (button) for no')
     while True:
         if waiting:
             if(time.time() - pressed_time)*1000 >= 20:
@@ -406,15 +310,6 @@ def check2(results_voice):
             elif GPIO.input(5) == GPIO.HIGH:
                 pressed_time = time.time()
                 waiting = True
-        # if keyboard.read_key() == "y":
-        #     # speech_file = open("speech.txt", "w")
-        #     # speech_file.write(results_voice)
-        #     # speech_file.close()
-        #     # status = 'result'
-        #     # main()
-
-        # elif keyboard.read_key() == "n":
-        #     voiceProgram()
 
 def similarityProgram():
     global status
@@ -499,13 +394,11 @@ def similarityProgram():
             elif GPIO.input(5) == GPIO.HIGH:
                 pressed_time = time.time()
                 waiting = True
-
     status = 'welcome'
     main()
 
 def main():
     while True:
-        ocrProgram()
         if status == 'welcome':
             welcomeScreen()
         elif status == 'camera':
@@ -554,24 +447,6 @@ if __name__ == '__main__':
     ## Vosk - End
 
     vs = WebcamVideoStream(src=0)
-    
-    ## Similarity
-    # ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-    # module_url = ROOT_DIR+"/module"
-    
-    # g = tf.Graph()
-    # with g.as_default():
-    #     text_input = tf.placeholder(dtype=tf.string, shape=[None])
-    #     embed = hub.load(module_url)
-    #     my_result = embed(text_input)
-    #     init_op = tf.group(
-    #         [tf.global_variables_initializer(), tf.tables_initializer()])
-    # g.finalize()
-    
-    # # Create session and initialize.
-    # session = tf.Session(graph=g)
-    # session.run(init_op)
-    ## Similarity - End
 
     status = 'welcome' # welcome, camera, voice, result
     main()
