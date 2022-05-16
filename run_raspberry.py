@@ -11,18 +11,16 @@ import sounddevice as sd # قراءة الصوت من الميكروفون
 import vosk # تحويل الصوت إلى نص
 import sys
 import json
-# import tensorflow_hub as hub
-# import tensorflow.compat.v1 as tf
-# tf.disable_v2_behavior()
-import os
 import re
 from textblob import TextBlob
 from picamera.array import PiRGBArray
 from picamera import PiCamera
 import RPi.GPIO as GPIO # Import Raspberry Pi GPIO library
-import io
 import requests
 from urllib.error import HTTPError
+from imutils.video import WebcamVideoStream
+from pytesseract import Output
+import imutils
 
 GPIO.setwarnings(False) # Ignore warning for now
 GPIO.setmode(GPIO.BCM) # Use physical pin numbering
@@ -164,7 +162,7 @@ def check1(text):
                     main()
                 else:
                     ocr_file = open("ocr.txt", "w")
-                    ocr_file.write(text)
+                    ocr_file.write(str(text))
                     ocr_file.close()
                     pressed = False
                     long_pressed = False
@@ -189,185 +187,48 @@ def ocrProgram():
     global pressed
     global long_pressed
     print("[INFO] starting video stream...")
-    # camera = PiCamera()
-    # camera.resolution = (640, 480)
-    # camera.framerate = 32
-    # rawCapture = PiRGBArray(camera, size=(640, 480))
-    # stream = io.BytesIO()
-    # allow the camera to warmup
-    vs = cv2.VideoCapture(0)
-    time.sleep(2.0)
-    if not vs.isOpened():
-        print("Cannot open camera")
-        exit()
-    isOCR = ''
-    # capture frames from the camera
+    vs = WebcamVideoStream(src=0).start()
     while True:
         # Capture frame-by-frame
-        ret, frame = vs.read()
-        # if frame is read correctly ret is True
-        if not ret:
-            print("Can't receive frames")
-            break
-    # if not vs.isOpened():
-    #     print("Cannot open camera")
-    #     exit()
-        # isOCR = ''
-    # while True:
-        # Capture frame-by-frame
-        # frame = frame.array
-        # ret, frame = vs.read()
-        # if frame is read correctly ret is True
-        # if not ret:
-        #     print("Can't receive frames")
-        #     break
-        
-        # Our operations on the frame come here
-        frame = cv2.resize(frame, (478, 358))
-        time.sleep(1)
+        frame = vs.read()
+        frame = imutils.resize(frame, width=400)
+        ocr_result = []
 
-        orig = frame.copy()
-        (origH, origW) = frame.shape[:2]
-        # set the new width and height and then determine the ratio in change
-        # for both the width and height
-        (newW, newH) = (args["width"], args["height"])
-        rW = origW / float(newW)
-        rH = origH / float(newH)
-        # resize the image and grab the new image dimensions
-        frame = cv2.resize(frame, (newW, newH))
-        (H, W) = frame.shape[:2]
-
-        # construct a blob from the image and then perform a forward pass of
-        # the model to obtain the two output layer sets
-        blob = cv2.dnn.blobFromImage(frame, 1.0, (W, H),
-            (123.68, 116.78, 103.94), swapRB=True, crop=False)
-        net.setInput(blob)
-        (scores, geometry) = net.forward(layerNames)
-        # decode the predictions, then  apply non-maxima suppression to
-        # suppress weak, overlapping bounding boxes
-        (rects, confidences) = decode_predictions(scores, geometry)
-        boxes = non_max_suppression(np.array(rects), probs=confidences)
-        if(not isinstance(boxes, list)):
-            box = np.array(
-            [np.amin(boxes, axis=0)[0], np.amin(boxes, axis=0)[1], 
-            np.amax(boxes, axis=0)[2], np.amax(boxes, axis=0)[3]]
-            )
-
-            # loop over the bounding boxes
-            startX, startY, endX, endY = box
-            # scale the bounding box coordinates based on the respective
-            # ratios
-            startX = int(startX * rW)
-            startY = int(startY * rH)
-            endX = int(endX * rW)
-            endY = int(endY * rH)
-            # in order to obtain a better OCR of the text we can potentially
-            # apply a bit of padding surrounding the bounding box -- here we
-            # are computing the deltas in both the x and y directions
-            dX = int((endX - startX) * args["padding"])
-            dY = int((endY - startY) * args["padding"])
-            # apply padding to each side of the bounding box, respectively
-            startX = max(0, startX - dX)
-            startY = max(0, startY - dY)
-            endX = min(origW, endX + (dX * 2))
-            endY = min(origH, endY + (dY * 2))
-
-        output = orig.copy()
-        if(not isinstance(boxes, list)):
-            if isOCR == False:
-                cv2.destroyWindow('Video')
-
-            cv2.rectangle(output, (startX, startY), (endX, endY),
-            	(0, 0, 255), 2)
-            # cv2.namedWindow("OCR", cv2.WND_PROP_FULLSCREEN) 
-            # cv2.setWindowProperty("OCR", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-            cv2.imshow('OCR', output)
-            isOCR = True
-
-            cv2.waitKey(1)
-            if waiting:
-                if(time.time() - pressed_time)*1000 >= 20:
-                    if GPIO.input(5) == GPIO.HIGH:
-                        pressed = True
-                if time.time() - pressed_time > 1:
-                    waiting = False
-                    if GPIO.input(5) == GPIO.HIGH:
-                        long_pressed = True
-            else:
-                if pressed:
-                    if long_pressed:
-                        status = 'welcome'
-                        vs.release()
-                        cv2.destroyAllWindows()
-                        main()
-                    else:
-                        status = 'voice'
-                        pressed = False
-                        long_pressed = False
-                        break
-                    
-
-                elif GPIO.input(5) == GPIO.HIGH:
-                    pressed_time = time.time()
-                    waiting = True
-
-            # if key == ord("y"):
-                
-            # elif key == ord("n"):
-                
-        else:
-            if isOCR == True:
-                cv2.destroyWindow('OCR')
-
-            # show the output image
-            # cv2.namedWindow("Video", cv2.WND_PROP_FULLSCREEN) 
-            # cv2.setWindowProperty("Video", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-            cv2.imshow("Video", output)
-            isOCR = False
-
-            cv2.waitKey(1)
-            if waiting:
-                if(time.time() - pressed_time)*1000 >= 20:
-                    if GPIO.input(5) == GPIO.HIGH:
-                        pressed = True
-                if time.time() - pressed_time > 1:
-                    waiting = False
-                    if GPIO.input(5) == GPIO.HIGH:
-                        long_pressed = True
-            else:
-                if pressed:
-                    if long_pressed:
-                        status = 'welcome'
-                        vs.release()
-                        cv2.destroyAllWindows()
-                        main()
-                    # else:
-                    #     print("Button is pressed")
-                    pressed = False
-                    long_pressed = False
-
-                elif GPIO.input(5) == GPIO.HIGH:
-                    pressed_time = time.time()
-                    waiting = True
-
-            # if key == ord("n"):
-            #     status = 'welcome'
-            #     vs.release()
-            #     cv2.destroyAllWindows()
-            #     main()
-
-    # extract the actual padded ROI
-    roi = orig[startY:endY, startX:endX]
-    # in order to apply Tesseract v4 to OCR text we must supply
-    # (1) a language, (2) an OEM flag of 1, indicating that the we
-    # wish to use the LSTM neural net model for OCR, and finally
-    # (3) an OEM value, in this case
-    config = ("-l eng --oem 1 --psm 3")
-    text = pytesseract.image_to_string(roi, config=config)
-    tb = TextBlob(text)
-    text = tb.correct()
+        d = pytesseract.image_to_data(frame, output_type=Output.DICT)
+        n_boxes = len(d['text'])
+        for i in range(n_boxes):
+            if int(d['conf'][i]) > 60:
+                ocr_result.append(d['text'][i])
+                (text, x, y, w, h) = (d['text'][i], d['left'][i], d['top'][i], d['width'][i], d['height'][i])
+                # don't show empty text
+                if text and text.strip() != "":
+                    frame = cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
     
-    vs.release()
+        ocr_result = " ".join(ocr_result)
+        tb = TextBlob(ocr_result)
+        text = tb.correct()
+        # Display the resulting frame
+        cv2.imshow('frame', frame)
+        cv2.waitKey(1)
+        if waiting:
+            if(time.time() - pressed_time)*1000 >= 20:
+                if GPIO.input(5) == GPIO.HIGH:
+                    pressed = True
+            if time.time() - pressed_time > 1:
+                waiting = False
+                if GPIO.input(5) == GPIO.HIGH:
+                    long_pressed = True
+        else:
+            if pressed:
+                pressed = False
+                long_pressed = False
+                break
+
+            elif GPIO.input(5) == GPIO.HIGH:
+                pressed_time = time.time()
+                waiting = True
+
+    vs.stop()
     cv2.destroyAllWindows()
     check1(text)
 
