@@ -242,7 +242,6 @@ def ocrProgram():
             ocr_result = " ".join(ocr_result)
             tb = TextBlob(ocr_result)
             text = tb.correct()
-            start_time = time.time() 
 
         # Display the resulting frame
         cv2.imshow('frame', frame)
