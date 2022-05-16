@@ -245,6 +245,9 @@ def ocrProgram():
                     break
             start_time = time.time()
 
+
+        v2.imshow('frame', frame)
+        cv2.waitKey(1)
         if isBreak == True:
             break
 
