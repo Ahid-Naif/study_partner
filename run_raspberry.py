@@ -155,6 +155,7 @@ def check1(text):
                 waiting = False
                 if GPIO.input(5) == GPIO.HIGH:
                     long_pressed = True
+                    time.sleep(1)
         else:
             if pressed:
                 if long_pressed:
