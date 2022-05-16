@@ -234,15 +234,15 @@ def voiceProgram():
     soundStream.start()
     start_time = time.time()
     while(cap.isOpened()):
-        if time.time() - start_time > 0.03333:  # 30 fps
-            ret, frame = cap.read()
-            if ret:
-                cv2.imshow("window", frame)
-                cv2.waitKey(1)
-            else:
-               cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
-               continue
-            start_time = time.time()
+        # if time.time() - start_time > 0.01111:  # 30 fps
+        #     ret, frame = cap.read()
+        #     if ret:
+        #         cv2.imshow("window", frame)
+        #         cv2.waitKey(1)
+        #     else:
+        #        cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+        #        continue
+        #     start_time = time.time()
         
         data = q.get()
         if rec.AcceptWaveform(data):
