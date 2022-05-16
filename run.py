@@ -14,11 +14,14 @@ import sys
 import json
 from datetime import datetime
 import tensorflow_hub as hub
-import tensorflow.compat.v1 as tf
-tf.disable_v2_behavior()
+import tensorflow as tf
+# import tensorflow.compat.v1 as tf
+# tf.disable_v2_behavior()
 import os
 import re
 from textblob import TextBlob
+import requests
+from urllib.error import HTTPError
 
 def welcomeScreen():
     global status
@@ -320,8 +323,13 @@ def check2(results_voice):
         elif keyboard.read_key() == "n":
             voiceProgram()
 
+
 def similarityProgram():
     global status
+    global waiting
+    global pressed_time
+    global pressed
+    global long_pressed
     #open text file in read mode
     ocr = open("ocr.txt", "r")
     ocr_data = ocr.read()
@@ -332,63 +340,66 @@ def similarityProgram():
     
     ocr_data = re.sub(r'[^\w]', ' ', ocr_data).rstrip()
     speech_data = re.sub(r'[^\w]', ' ', speech_data).rstrip()
-    # print(ocr_data)
-    # print(speech_data)
 
-    my_result_out = session.run(
-        my_result, feed_dict={text_input: [ocr_data.lower(), speech_data.lower()]})
-    # print(my_result_out)
-    corr = np.inner(my_result_out, my_result_out)
+    myobj = {'a': ocr_data, 'b': speech_data}
+    myobj =  json.dumps(myobj)
 
-    # print('Result is: ')
-    result = float("{:.2f}".format(corr[0][1]))*100
+    try:
+        x = requests.post('https://hammerhead-app-lnodz.ondigitalocean.app/similar', data = myobj)
+    except HTTPError as e:
+        pass
+    time.sleep(5)
+
+    cap = cv2.VideoCapture('screens2/processing.mp4')
     start_time = time.time()
-    cap = cv2.VideoCapture('screens/processing.mp4')
     while(cap.isOpened()):
-        ret, frame = cap.read() 
-        cv2.namedWindow("window", cv2.WND_PROP_FULLSCREEN)
-        cv2.setWindowProperty("window",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
+        ret, frame = cap.read()
         if ret:
             cv2.imshow("window", frame)
         else:
-        #    print('no video')
            cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
            continue
+        
+        if time.time() - start_time > 5:
+            try:
+                x = requests.get('https://hammerhead-app-lnodz.ondigitalocean.app/getResult')
+                result = x.text
+                if result != "":
+                    result = float(x.text)
+                    cap.release()
+                    cv2.destroyAllWindows()
+                    break
+            except HTTPError as e:
+                print(e)    
+            start_time = time.time()
+           
+        time.sleep(0.03333) # 30 fps
         cv2.waitKey(1)
-        if time.time() - start_time > 2:
-            cap.release()
-            cv2.destroyAllWindows()
-            break
-        time.sleep(0.03333) # 30 fps
 
-    if result > 70:
-        cap = cv2.VideoCapture('screens/happy.mp4')
-    elif result >= 40 and result <= 70:
-        cap = cv2.VideoCapture('screens/neutral.mp4')
-    elif result < 40:
-        cap = cv2.VideoCapture('screens/sad.mp4')
+    if result > 70.0:
+        cap2 = cv2.VideoCapture('screens2/happy.mp4')
+    elif result >= 40.0 and result <= 70.0:
+        cap2 = cv2.VideoCapture('screens2/neutral.mp4')
+    elif result < 40.0:
+        cap2 = cv2.VideoCapture('screens2/sad.mp4')
 
-    while(cap.isOpened()):
-        ret, frame = cap.read() 
-        cv2.namedWindow("window", cv2.WND_PROP_FULLSCREEN)
-        cv2.setWindowProperty("window",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
+    while(cap2.isOpened()):
+        ret, frame = cap2.read() 
         if ret:
             cv2.imshow("window", frame)
         else:
-        #    print('no video')
-           cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+           cap2.set(cv2.CAP_PROP_POS_FRAMES, 0)
            continue
-        if cv2.waitKey(1) & 0xFF == 32:
-            cap.release()
-            cv2.destroyAllWindows()
+        time.sleep(0.09999) # 30 fps
+        if cv2.waitKey(1) & 0xFF == ord('y'):
             break
-        time.sleep(0.03333) # 30 fps
-    # print(result)
+
     status = 'welcome'
     main()
 
 def main():
     while True:
+        similarityProgram()
         if status == 'welcome':
             welcomeScreen()
         elif status == 'camera':
@@ -418,41 +429,44 @@ if __name__ == '__main__':
     # define the two output layer names for the EAST detector model that
     # we are interested in -- the first is the output probabilities and the
     # second can be used to derive the bounding box coordinates of text
-    layerNames = [
-        "feature_fusion/Conv_7/Sigmoid",
-        "feature_fusion/concat_3"]
+    # layerNames = [
+    #     "feature_fusion/Conv_7/Sigmoid",
+    #     "feature_fusion/concat_3"]
     
-    # load the pre-trained EAST text detector
-    print("[INFO] loading EAST text detector...")
-    net = cv2.dnn.readNet(args["east"])
+    # # load the pre-trained EAST text detector
+    # print("[INFO] loading EAST text detector...")
+    # net = cv2.dnn.readNet(args["east"])
     
-    ## Vosk
-    # تعريف مكتبة queue
-    q = queue.Queue()
-    samplerate = 48000
-    model = vosk.Model("model")
-    rec = vosk.KaldiRecognizer(model, samplerate)
-    rec.SetWords(True)
-    soundStream = sd.RawInputStream(samplerate=samplerate, blocksize = 8000, dtype='int16', channels=1, callback=callback)
-    ## Vosk - End
+    # ## Vosk
+    # # تعريف مكتبة queue
+    # q = queue.Queue()
+    # samplerate = 48000
+    # model = vosk.Model("model")
+    # rec = vosk.KaldiRecognizer(model, samplerate)
+    # rec.SetWords(True)
+    # soundStream = sd.RawInputStream(samplerate=samplerate, blocksize = 8000, dtype='int16', channels=1, callback=callback)
+    # ## Vosk - End
     
     ## Similarity
-    ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-    module_url = ROOT_DIR+"\module"
+    # ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+    # module_url = ROOT_DIR+"\module"
     
-    g = tf.Graph()
-    with g.as_default():
-        text_input = tf.placeholder(dtype=tf.string, shape=[None])
-        embed = hub.load(module_url)
-        my_result = embed(text_input)
-        init_op = tf.group(
-            [tf.global_variables_initializer(), tf.tables_initializer()])
-    g.finalize()
+    # g = tf.Graph()
+    # with g.as_default():
+    #     text_input = tf.placeholder(dtype=tf.string, shape=[None])
+    #     embed = hub.load(module_url)
+    #     my_result = embed(text_input)
+    #     # model_file = open("model.txt", "w")
+    #     # model_file.write(my_result)
+    #     # model_file.close()
+    #     init_op = tf.group(
+    #         [tf.global_variables_initializer(), tf.tables_initializer()])
+    # g.finalize()
     
-    # Create session and initialize.
-    session = tf.Session(graph=g)
-    session.run(init_op)
-    ## Similarity - End
+    # # Create session and initialize.
+    # session = tf.Session(graph=g)
+    # session.run(init_op)
+    # ## Similarity - End
 
     status = 'welcome' # welcome, camera, voice, result
     main()
