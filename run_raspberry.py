@@ -190,7 +190,9 @@ def ocrProgram():
     global long_pressed
     global vs
     global n_boxes
-    global ocr_result = []
+    global ocr_result
+    ocr_result = []
+
     print("[INFO] starting video stream...")
     vs.start()
     start_time = time.time() -10   
