@@ -189,6 +189,7 @@ def ocrProgram():
     global long_pressed
     print("[INFO] starting video stream...")
     vs = WebcamVideoStream(src=0).start()
+    time.sleep(2)
     while True:
         # Capture frame-by-frame
         frame = vs.read()
