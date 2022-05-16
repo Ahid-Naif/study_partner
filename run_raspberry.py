@@ -47,7 +47,7 @@ def welcomeScreen():
             cap.release()
             cv2.destroyAllWindows()
             status = 'camera'
-            main(status)
+            main()
             # break
         time.sleep(0.03333) # 30 fps
 
@@ -66,7 +66,7 @@ def welcomeScreen():
                 cap.release()
                 cv2.destroyAllWindows()
                 status = 'camera'
-                main(status)
+                main()
     
             elif GPIO.input(5) == GPIO.HIGH:
                 pressed_time = time.time()
@@ -97,11 +97,10 @@ def check1(text):
         else:
             if pressed:
                 if long_pressed:
-                    status = 'camera'
                     pressed = False
                     long_pressed = False
-                    print('main--')
-                    main(status)
+                    status = 'camera'
+                    main()
                 else:
                     ocr_file = open("ocr.txt", "w")
                     ocr_file.write(str(text))
@@ -109,8 +108,8 @@ def check1(text):
                     pressed = False
                     long_pressed = False
                     print("voice")
-                    status == "voice"
-                    main(status)
+                    status = 'voice'
+                    main()
 
             elif GPIO.input(5) == GPIO.HIGH:
                 pressed_time = time.time()
@@ -202,7 +201,6 @@ def callback(indata, frames, time, status):
     q.put(bytes(indata))
 
 def voiceProgram():
-    print("voice start")
     results_voice = []
     global waiting
     global pressed_time
@@ -307,7 +305,7 @@ def check2(results_voice):
                     speech_file.write(results_voice)
                     speech_file.close()
                     status = 'result'
-                    main(status)
+                    main()
                 pressed = False
                 long_pressed = False
 
@@ -399,11 +397,10 @@ def similarityProgram():
                 pressed_time = time.time()
                 waiting = True
     status = 'welcome'
-    main(status)
+    main()
 
-def main(status):
-    print("status:")
-    print(status)
+def main():
+    global status
 
     while True:
         if status == 'welcome':
@@ -454,4 +451,4 @@ if __name__ == '__main__':
     ## Vosk - End
 
     status = 'welcome' # welcome, camera, voice, result
-    main(status)
+    main()
