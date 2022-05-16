@@ -11,8 +11,8 @@ while True:
     frame = cap.read()
     frame = imutils.resize(frame, width=400)
 
- 
     d = pytesseract.image_to_data(frame, output_type=Output.DICT)
+    print(type(d['text']))
     n_boxes = len(d['text'])
     for i in range(n_boxes):
         if int(d['conf'][i]) > 60:
