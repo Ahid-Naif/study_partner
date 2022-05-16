@@ -161,6 +161,7 @@ def check1(text):
             if pressed:
                 if long_pressed:
                     status = 'camera'
+                    print('main--')
                     main()
                 else:
                     ocr_file = open("ocr.txt", "w")
@@ -220,7 +221,7 @@ def ocrProgram():
             start_time2 = time.time()
             while True:
                 # Display the resulting frame
-                if time.time() - start_time2 < 3:
+                if time.time() - start_time2 < 1:
                     cv2.imshow('frame', frame)
                     cv2.waitKey(1)
                     if waiting:
