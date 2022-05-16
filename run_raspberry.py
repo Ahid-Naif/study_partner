@@ -1,4 +1,5 @@
 # from glob import glob
+from glob import glob
 from imutils.object_detection import non_max_suppression
 import numpy as np
 import pytesseract
@@ -187,8 +188,9 @@ def ocrProgram():
     global pressed_time
     global pressed
     global long_pressed
+    global vs
     print("[INFO] starting video stream...")
-    vs = WebcamVideoStream(src=0).start()
+    vs.start()
     time.sleep(2)
     while True:
         # Capture frame-by-frame
@@ -531,6 +533,8 @@ if __name__ == '__main__':
     rec.SetWords(True)
     soundStream = sd.RawInputStream(samplerate=samplerate, blocksize = 8000, dtype='int16', channels=1, callback=callback)
     ## Vosk - End
+
+    vs = WebcamVideoStream(src=0)
     
     ## Similarity
     # ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
