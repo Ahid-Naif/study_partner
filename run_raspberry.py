@@ -190,26 +190,12 @@ def ocrProgram():
     global long_pressed
     global vs
     global n_boxes
+    global isBreak
     print("[INFO] starting video stream...")
     vs.start()
-    frame = vs.read()
-    frame = imutils.resize(frame, width=400)
 
-    ocr_result = []
-    d = pytesseract.image_to_data(frame, output_type=Output.DICT)
-    n_boxes = len(d['text'])
-    for i in range(n_boxes):
-        if int(d['conf'][i]) > 60:
-            ocr_result.append(d['text'][i])
-            (text, x, y, w, h) = (d['text'][i], d['left'][i], d['top'][i], d['width'][i], d['height'][i])
-            # don't show empty text
-            if text and text.strip() != "":
-                frame = cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-
-    ocr_result = " ".join(ocr_result)
-    tb = TextBlob(ocr_result)
-    text = tb.correct()
     start_time = time.time()
+    isBreak = False
     while True:
         # Capture frame-by-frame
         frame = vs.read()
@@ -230,39 +216,37 @@ def ocrProgram():
             ocr_result = " ".join(ocr_result)
             tb = TextBlob(ocr_result)
             text = tb.correct()
+
+            start_time2 = time.time()
+            while True:
+                # Display the resulting frame
+                if time.time() - start_time2 < 3:
+                    cv2.imshow('frame', frame)
+                    cv2.waitKey(1)
+                    if waiting:
+                        if(time.time() - pressed_time)*1000 >= 20:
+                            if GPIO.input(5) == GPIO.HIGH:
+                                pressed = True
+                        if time.time() - pressed_time > 1:
+                            waiting = False
+                            if GPIO.input(5) == GPIO.HIGH:
+                                long_pressed = True
+                    else:
+                        if pressed:
+                            pressed = False
+                            long_pressed = False
+                            isBreak = True
+                            break
+                        
+                        elif GPIO.input(5) == GPIO.HIGH:
+                            pressed_time = time.time()
+                            waiting = True
+                else:
+                    break
             start_time = time.time()
-        else:
-            for i in range(n_boxes):
-                if int(d['conf'][i]) > 60:
-                    (text, x, y, w, h) = (d['text'][i], d['left'][i], d['top'][i], d['width'][i], d['height'][i])
-                    # don't show empty text
-                    if text and text.strip() != "":
-                        frame = cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
-            ocr_result = " ".join(ocr_result)
-            tb = TextBlob(ocr_result)
-            text = tb.correct()
-
-        # Display the resulting frame
-        cv2.imshow('frame', frame)
-        cv2.waitKey(1)
-        if waiting:
-            if(time.time() - pressed_time)*1000 >= 20:
-                if GPIO.input(5) == GPIO.HIGH:
-                    pressed = True
-            if time.time() - pressed_time > 1:
-                waiting = False
-                if GPIO.input(5) == GPIO.HIGH:
-                    long_pressed = True
-        else:
-            if pressed:
-                pressed = False
-                long_pressed = False
-                break
-
-            elif GPIO.input(5) == GPIO.HIGH:
-                pressed_time = time.time()
-                waiting = True
+        if isBreak == True:
+            break
 
     vs.stop()
     cv2.destroyAllWindows()
