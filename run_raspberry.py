@@ -192,7 +192,7 @@ def ocrProgram():
     global n_boxes
     print("[INFO] starting video stream...")
     vs.start()
-    start_time = time.time()   
+    start_time = time.time() - 10
     while True:
         # Capture frame-by-frame
         frame = vs.read()
