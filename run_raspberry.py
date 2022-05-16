@@ -124,13 +124,12 @@ def ocrProgram():
     global n_boxes
     global isBreak
     print("[INFO] starting video stream...")
-    vs.start()
-
+    vs = cv2.VideoCapture(0)
     start_time = time.time()
     isBreak = False
     while True:
         # Capture frame-by-frame
-        frame = vs.read()
+        ret, frame = vs.read()
         frame = imutils.resize(frame, width=400)
         
         if time.time() - start_time > 5:
@@ -182,7 +181,7 @@ def ocrProgram():
         if isBreak == True:
             break
 
-    vs.stop()
+    vs.release()
     cv2.destroyAllWindows()
     check1(text)
 
@@ -401,7 +400,7 @@ def similarityProgram():
 
 def main():
     global status
-    
+
     while True:
         if status == 'welcome':
             welcomeScreen()
@@ -449,8 +448,6 @@ if __name__ == '__main__':
     rec.SetWords(True)
     soundStream = sd.RawInputStream(samplerate=samplerate, blocksize = 8000, dtype='int16', channels=1, callback=callback)
     ## Vosk - End
-
-    vs = WebcamVideoStream(src=0)
 
     status = 'welcome' # welcome, camera, voice, result
     main()
