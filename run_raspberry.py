@@ -169,6 +169,8 @@ def check1(text):
                     ocr_file.close()
                     pressed = False
                     long_pressed = False
+                    vs.stop()
+                    cv2.destroyAllWindows()
                     main()
 
             elif GPIO.input(5) == GPIO.HIGH:
