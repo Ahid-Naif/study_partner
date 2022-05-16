@@ -192,6 +192,8 @@ def ocrProgram():
     global n_boxes
     print("[INFO] starting video stream...")
     vs.start()
+    frame = vs.read()
+    frame = imutils.resize(frame, width=400)
 
     ocr_result = []
     d = pytesseract.image_to_data(frame, output_type=Output.DICT)
