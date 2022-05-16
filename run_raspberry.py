@@ -169,8 +169,6 @@ def check1(text):
                     ocr_file.close()
                     pressed = False
                     long_pressed = False
-                    vs.stop()
-                    cv2.destroyAllWindows()
                     main()
 
             elif GPIO.input(5) == GPIO.HIGH:
@@ -223,7 +221,7 @@ def ocrProgram():
             start_time2 = time.time()
             while True:
                 # Display the resulting frame
-                if time.time() - start_time2 < 1:
+                if time.time() - start_time2 < 2:
                     cv2.imshow('frame', frame)
                     cv2.waitKey(1)
                     if waiting:
@@ -247,7 +245,6 @@ def ocrProgram():
                 else:
                     break
             start_time = time.time()
-
 
         cv2.imshow('frame', frame)
         cv2.waitKey(1)
