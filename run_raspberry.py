@@ -190,12 +190,9 @@ def ocrProgram():
     global long_pressed
     global vs
     global n_boxes
-    global ocr_result
-    ocr_result = []
-
     print("[INFO] starting video stream...")
     vs.start()
-    start_time = time.time() -10   
+    start_time = time.time()   
     while True:
         # Capture frame-by-frame
         frame = vs.read()
@@ -220,7 +217,6 @@ def ocrProgram():
         else:
             for i in range(n_boxes):
                 if int(d['conf'][i]) > 60:
-                    ocr_result.append(d['text'][i])
                     (text, x, y, w, h) = (d['text'][i], d['left'][i], d['top'][i], d['width'][i], d['height'][i])
                     # don't show empty text
                     if text and text.strip() != "":
