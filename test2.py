@@ -13,7 +13,6 @@ while True:
     ocr_result = []
 
     d = pytesseract.image_to_data(frame, output_type=Output.DICT)
-    print(type(d['text']))
     n_boxes = len(d['text'])
     for i in range(n_boxes):
         if int(d['conf'][i]) > 60:
@@ -24,6 +23,7 @@ while True:
                 frame = cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
                 # frame = cv2.putText(frame, text, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255), 3)
  
+    ocr_result = " ".join(ocr_result)
     print(ocr_result)
     # Display the resulting frame
     cv2.imshow('frame', frame)
