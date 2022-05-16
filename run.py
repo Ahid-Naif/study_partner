@@ -1,5 +1,3 @@
-from multiprocessing.connection import wait
-from unittest import result
 from imutils.object_detection import non_max_suppression
 import numpy as np
 import pytesseract
@@ -12,22 +10,18 @@ import sounddevice as sd # قراءة الصوت من الميكروفون
 import vosk # تحويل الصوت إلى نص
 import sys
 import json
-from datetime import datetime
 import tensorflow_hub as hub
-import tensorflow as tf
-# import tensorflow.compat.v1 as tf
-# tf.disable_v2_behavior()
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 import os
 import re
 from textblob import TextBlob
-import requests
 from urllib.error import HTTPError
 
 def welcomeScreen():
     global status
-    # print('welcome')
-    # print('Press (y) to start')
-    cap = cv2.VideoCapture('screens/welcome.mp4')
+    print('Press (y) to start')
+    cap = cv2.VideoCapture('screens2/welcome.mp4')
     while(cap.isOpened()):
         ret, frame = cap.read() 
         cv2.namedWindow("window", cv2.WND_PROP_FULLSCREEN)
@@ -36,7 +30,6 @@ def welcomeScreen():
         if ret:
             cv2.imshow("window", frame)
         else:
-        #    print('no video')
            cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
            continue
 
@@ -45,14 +38,7 @@ def welcomeScreen():
             cv2.destroyAllWindows()
             status = 'camera'
             main()
-            # break
         time.sleep(0.03333) # 30 fps
-    # while True:
-        # if keyboard.read_key() == "y":
-        #     cap.release()
-        #     cv2.destroyAllWindows()
-        #     status = 'camera'
-        #     main()
 
 def decode_predictions(scores, geometry):
     # grab the number of rows and columns from the scores volume, then
@@ -254,14 +240,16 @@ def callback(indata, frames, time, status):
 
 def voiceProgram():
     results_voice = []
-    img = cv2.imread('screens/mic.jpg')
+    img = cv2.imread('screens2/mic.jpg')
     while True:
+        cv2.namedWindow("window", cv2.WND_PROP_FULLSCREEN)
+        cv2.setWindowProperty("window",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
         cv2.imshow("window", img)
         if cv2.waitKey(1) & 0xFF == 32:
             break
     cv2.destroyAllWindows()
 
-    cap = cv2.VideoCapture('screens/listening.mp4')
+    cap = cv2.VideoCapture('screens2/listening.mp4')
     soundStream.start()
     start_time = time.time()
     while(cap.isOpened()):
@@ -323,7 +311,6 @@ def check2(results_voice):
         elif keyboard.read_key() == "n":
             voiceProgram()
 
-
 def similarityProgram():
     global status
     global waiting
@@ -340,15 +327,12 @@ def similarityProgram():
     
     ocr_data = re.sub(r'[^\w]', ' ', ocr_data).rstrip()
     speech_data = re.sub(r'[^\w]', ' ', speech_data).rstrip()
-
-    myobj = {'a': ocr_data, 'b': speech_data}
-    myobj =  json.dumps(myobj)
-
-    try:
-        x = requests.post('https://hammerhead-app-lnodz.ondigitalocean.app/similar', data = myobj)
-    except HTTPError as e:
-        pass
-    time.sleep(5)
+    print("Image Result")
+    print("========")
+    print("{}\n".format(ocr_data))
+    print("Voice Result")
+    print("========")
+    print("{}\n".format(speech_data))
 
     cap = cv2.VideoCapture('screens2/processing.mp4')
     start_time = time.time()
@@ -356,25 +340,22 @@ def similarityProgram():
         ret, frame = cap.read()
         if ret:
             cv2.imshow("window", frame)
+            cv2.waitKey(1)
+            time.sleep(0.03333)
         else:
            cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
            continue
+
+        if time.time() - start_time > 3:
+            cap.release()
+            cv2.destroyAllWindows()
+            break
         
-        if time.time() - start_time > 5:
-            try:
-                x = requests.get('https://hammerhead-app-lnodz.ondigitalocean.app/getResult')
-                result = x.text
-                if result != "":
-                    result = float(x.text)
-                    cap.release()
-                    cv2.destroyAllWindows()
-                    break
-            except HTTPError as e:
-                print(e)    
-            start_time = time.time()
-           
-        time.sleep(0.03333) # 30 fps
-        cv2.waitKey(1)
+    my_result_out = session.run(
+    my_result, feed_dict={text_input: [ocr_data.lower(), speech_data.lower()]})
+    corr = np.inner(my_result_out, my_result_out)
+    result = float("{:.2f}".format(corr[0][1]))*100
+
 
     if result > 70.0:
         cap2 = cv2.VideoCapture('screens2/happy.mp4')
@@ -386,6 +367,8 @@ def similarityProgram():
     while(cap2.isOpened()):
         ret, frame = cap2.read() 
         if ret:
+            cv2.namedWindow("window", cv2.WND_PROP_FULLSCREEN)
+            cv2.setWindowProperty("window",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
             cv2.imshow("window", frame)
         else:
            cap2.set(cv2.CAP_PROP_POS_FRAMES, 0)
@@ -394,12 +377,13 @@ def similarityProgram():
         if cv2.waitKey(1) & 0xFF == ord('y'):
             break
 
+    cap.release()
+    cv2.destroyAllWindows()
     status = 'welcome'
     main()
 
 def main():
     while True:
-        similarityProgram()
         if status == 'welcome':
             welcomeScreen()
         elif status == 'camera':
@@ -429,44 +413,44 @@ if __name__ == '__main__':
     # define the two output layer names for the EAST detector model that
     # we are interested in -- the first is the output probabilities and the
     # second can be used to derive the bounding box coordinates of text
-    # layerNames = [
-    #     "feature_fusion/Conv_7/Sigmoid",
-    #     "feature_fusion/concat_3"]
+    layerNames = [
+        "feature_fusion/Conv_7/Sigmoid",
+        "feature_fusion/concat_3"]
     
-    # # load the pre-trained EAST text detector
-    # print("[INFO] loading EAST text detector...")
-    # net = cv2.dnn.readNet(args["east"])
+    # load the pre-trained EAST text detector
+    print("[INFO] loading EAST text detector...")
+    net = cv2.dnn.readNet(args["east"])
     
-    # ## Vosk
-    # # تعريف مكتبة queue
-    # q = queue.Queue()
-    # samplerate = 48000
-    # model = vosk.Model("model")
-    # rec = vosk.KaldiRecognizer(model, samplerate)
-    # rec.SetWords(True)
-    # soundStream = sd.RawInputStream(samplerate=samplerate, blocksize = 8000, dtype='int16', channels=1, callback=callback)
-    # ## Vosk - End
+    ## Vosk
+    # تعريف مكتبة queue
+    q = queue.Queue()
+    samplerate = 48000
+    model = vosk.Model("model")
+    rec = vosk.KaldiRecognizer(model, samplerate)
+    rec.SetWords(True)
+    soundStream = sd.RawInputStream(samplerate=samplerate, blocksize = 8000, dtype='int16', channels=1, callback=callback)
+    ## Vosk - End
     
-    ## Similarity
-    # ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-    # module_url = ROOT_DIR+"\module"
+    # Similarity
+    ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+    module_url = ROOT_DIR+"\module"
     
-    # g = tf.Graph()
-    # with g.as_default():
-    #     text_input = tf.placeholder(dtype=tf.string, shape=[None])
-    #     embed = hub.load(module_url)
-    #     my_result = embed(text_input)
-    #     # model_file = open("model.txt", "w")
-    #     # model_file.write(my_result)
-    #     # model_file.close()
-    #     init_op = tf.group(
-    #         [tf.global_variables_initializer(), tf.tables_initializer()])
-    # g.finalize()
+    g = tf.Graph()
+    with g.as_default():
+        text_input = tf.placeholder(dtype=tf.string, shape=[None])
+        embed = hub.load(module_url)
+        my_result = embed(text_input)
+        # model_file = open("model.txt", "w")
+        # model_file.write(my_result)
+        # model_file.close()
+        init_op = tf.group(
+            [tf.global_variables_initializer(), tf.tables_initializer()])
+    g.finalize()
     
-    # # Create session and initialize.
-    # session = tf.Session(graph=g)
-    # session.run(init_op)
-    # ## Similarity - End
+    # Create session and initialize.
+    session = tf.Session(graph=g)
+    session.run(init_op)
+    ## Similarity - End
 
     status = 'welcome' # welcome, camera, voice, result
     main()
