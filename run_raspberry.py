@@ -106,6 +106,7 @@ def check1(text):
                     ocr_file.close()
                     pressed = False
                     long_pressed = False
+                    print("voice")
                     status == 'voice'
                     main()
 
@@ -399,6 +400,8 @@ def similarityProgram():
     main()
 
 def main():
+    global status
+    
     while True:
         if status == 'welcome':
             welcomeScreen()
