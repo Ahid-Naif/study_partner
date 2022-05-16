@@ -299,15 +299,18 @@ def check2(results_voice):
         else:
             if pressed:
                 if long_pressed:
+                    pressed = False
+                    long_pressed = False
                     voiceProgram()
                 else:
+                    time.sleep(1)
                     speech_file = open("speech.txt", "w")
                     speech_file.write(results_voice)
                     speech_file.close()
                     status = 'result'
+                    pressed = False
+                    long_pressed = False
                     main()
-                pressed = False
-                long_pressed = False
 
             elif GPIO.input(5) == GPIO.HIGH:
                 pressed_time = time.time()
