@@ -17,6 +17,30 @@ import os
 import re
 from textblob import TextBlob
 from urllib.error import HTTPError
+import tkinter as tk
+
+def printResultsMsgBox(text1, text2):
+    root = tk.Tk()
+    frame1 = tk.Frame(root, bg='gold')
+    frame1.pack(fill=tk.X)
+    frame1.columnconfigure(0, weight=1)
+    frame2 = tk.Frame(root)
+    frame2.pack()
+    frame3 = tk.Frame(root, bg='gold')
+    frame3.pack(fill=tk.X)
+    frame3.columnconfigure(0, weight=1)
+    frame4 = tk.Frame(root)
+    frame4.pack()
+    frame1label1 = tk.Label(frame1, bg='gold', text='OCR Result')
+    frame1label1.grid(row=0, column=0)
+    frame2label = tk.Label(frame2, text=text1)
+    frame2label.pack()
+    frame3label1 = tk.Label(frame3, bg='gold', text='Voice Result')
+    frame3label1.grid(row=1, column=0)
+    frame4label = tk.Label(frame4, text=text2)
+    frame4label.pack()
+    root.mainloop()
+    root.quit()
 
 def welcomeScreen():
     global status
@@ -379,6 +403,9 @@ def similarityProgram():
 
     cap.release()
     cv2.destroyAllWindows()
+
+    printResultsMsgBox(ocr_data, speech_data)
+
     status = 'welcome'
     main()
 
